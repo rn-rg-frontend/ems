@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react'
-import DataTableWithExport from './ExpenceTable'
-import Addexpence from './Addexpence';
+import DataTableWithExport from './SalaryTable'
+import Addexpence from './SalaryHistory';
 
 function SalaryComponent() {
     const [selectedUser,setSelectedUser] = useState(false);

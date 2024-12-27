@@ -48,8 +48,8 @@ const DataTableWithExport = ({setSelectedUser}) => {
         </TableHeader>
         <TableBody>
           {data.map((row) => (
-            <TableRow key={row.id} onClick={()=>selectEmployee(row)}>
-              <TableCell>{row.employeeName}</TableCell>
+            <TableRow key={row.id} className='cursor-pointer' onClick={()=>selectEmployee(row)}>
+              <TableCell >{row.employeeName}</TableCell>
               <TableCell className='text-center'>{row.salary}</TableCell>
             </TableRow>
           ))}

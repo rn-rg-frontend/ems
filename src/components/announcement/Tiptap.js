@@ -31,16 +31,11 @@ const Tiptap = ({}) => {
     extensions: [Underline,Image.configure({
       inline: true,
       HTMLAttributes:{
-        class : 'm-auto w-11/12  h-auto object-contain',
+        class : 'object-contain max-w-11/12 m-auto',
       }
     }),
       TextAlign.configure({
       types: [ 'paragraph'],
-    }),
-    Image.configure({
-      HTMLAttributes: {
-        class: 'max-w-full h-auto',
-      },
     }),
     StarterKit.configure({
       heading:{
@@ -65,7 +60,7 @@ const Tiptap = ({}) => {
     ],
     editorProps:{
       attributes:{
-        class:"ronded border h-52 p-2  h-64 overflow-scroll border-black"
+        class:"ronded border min-h-62  p-2  h-72 overflow-scroll border-black"
       }
     },
 
@@ -80,7 +75,7 @@ const Tiptap = ({}) => {
   }
   return <div className="w-full">
     <Toolbar  editor={editor} content={content} />
-    <EditorContent  style={{ whiteSpace: "pre-line" }}  editor={editor} />
+    <EditorContent  style={{ whiteSpace: "pre-line" }}   editor={editor} />
   </div>
 }
 

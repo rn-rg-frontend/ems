@@ -32,7 +32,6 @@ const SelectedEmployee = ({ selectedUser,setSelectedUser }) => {
 
   return (
     <div className="w-full max-w-4xl m-auto space-y-4">
-
       <div className='text-lg font-bold flex justify-between'>
         <p>{selectedUser.employeeName} Salary History</p>
         <MoveLeft onClick={()=>setSelectedUser()}/>

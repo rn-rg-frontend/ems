@@ -18,12 +18,33 @@ import {
     AlignRight,
     ImageUp
 } from "lucide-react";
-
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 export default function Toolbar({ editor, content }) {
     const [openModal, setOpenModal] = useState(false);
     if (!editor) {
         return null;
     }
+    const handleImageUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                editor.chain().focus().setImage({ src: dataUrl }).run();
+            };
+            reader.readAsDataURL(file);
+        }
+    };
     return (
         <>
             <div
@@ -203,7 +224,7 @@ export default function Toolbar({ editor, content }) {
                     >
                         <Code className="md:w-5 md:h-5 font-bold w-3 h-3" />
                     </button>
-                   
+
                     <button
                         onClick={(e) => {
                             e.preventDefault();
@@ -230,9 +251,38 @@ export default function Toolbar({ editor, content }) {
                     >
                         <Redo className="md:w-5 md:h-5 font-bold w-3 h-3" />
                     </button>
-                    <button className="bg-blue-800 text-white p-2 rounded-lg">
-                        <ImageUp className="md:w-5 md:h-5 font-bold w-3 h-3" />
-                    </button>
+                    <div className="hover:bg-blue-800 hover:text-white  rounded-lg">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <ImageUp className="md:w-5 md:h-5 font-bold w-3 h-3 m-2" />
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px] w-full">
+                                <DialogHeader>
+                                    <DialogTitle className='text-center'>Uplod Image</DialogTitle>
+                                </DialogHeader>
+                                <form className="w-full ">
+                                    {/* <label htmlFor="file" className="p-2 w-full bg-black text-white">
+                                        Upload Image
+                                    </label> */}
+                                    {/* <input
+                                        type="file"
+                                        id="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        className=""
+                                    /> */}
+
+                                    {/* <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label> */}
+                                    <input className="block w-full text-sm p-2 text-gray-900 border border-black rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" type="file"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                         />
+
+                                </form>
+
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
 
             </div>

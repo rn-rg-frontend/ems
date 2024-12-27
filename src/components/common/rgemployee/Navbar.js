@@ -11,7 +11,7 @@ function Navbar() {
           <p className='text-sm text-gray-500 font-bold relative w-full text-center'><span>Pvt.Ltd</span><span className='w-4/5 absolute border-1 border-gray-500 top-1/2'></span></p>
         </div>
       </div>
-      <p className='md:text-2xl md:font-bold text-lg font-semibold'>Admin Panel</p>
+      <p className='md:text-2xl md:font-bold text-lg font-semibold'>Hello Rohan</p>
       <Button>
         Login
       </Button>
