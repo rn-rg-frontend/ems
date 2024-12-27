@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserProfile {
+  id               Int      @id @default(autoincrement())
+  userName         String   @unique
+  password         String
+  isAdmin          Boolean
+  name             String
+  photo            Bytes
+  designation      String
+  dateOfJoining    DateTime
+  email            String
+  contactDetails   String
+  DOB              DateTime
+  highestEducation String
+  instituteName    String
+  aadharCard       String
+  panCard          String
+  bloodGroup       String
+  address          String
+  endDate          DateTime
+  emergencyContact String
+  medicalHistory   String
+  totalLeave       Int
+  totalWFH         Int      @default(0)
+  salaryId         Int?     @unique
+  createdAt        DateTime @default(now())
+
+  salary        Salary?         @relation("SalaryRelation")
+  leaves        LeaveTable[]    @relation("LeaveRelation")
+  wfh           WFHtable[]      @relation("WFHRelation")
+  expense       Expense[]       @relation("ExpenseRelation")
+  salaryhistory SalaryHistory[] @relation("UserSalaryHistoryRelation")
+  cv            CV[]            @relation("CVRelation")
+  typeofexpense TypeOfExpense[] @relation("typeofExpenseRelation")
+  comment       Comments[]       @relation("CommentsRelation")
+}
+
+model LeaveTable {
+  id            Int      @id @default(autoincrement())
+  leaveType     String
+  startDate     DateTime
+  endDate       DateTime
+  totalLeaves   Int
+  createdAt     DateTime @default(now())
+  status        Boolean?
+  userProfileId Int
+
+  userProfile UserProfile? @relation("LeaveRelation", fields: [userProfileId], references: [id])
+}
+
+model WFHtable {
+  id            Int      @id @default(autoincrement())
+  date          DateTime
+  createdAt     DateTime @default(now())
+  status        Boolean?
+  userProfileId Int
+
+  userProfile UserProfile @relation("WFHRelation", fields: [userProfileId], references: [id])
+}
+
+model Annoucement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime @default(now())
+}
+
+model Salary {
+  id         Int          @id @default(autoincrement())
+  salary     Float
+  employeeId Int          @unique
+  profile    UserProfile? @relation("SalaryRelation", fields: [employeeId], references: [id])
+
+  salaryHistory SalaryHistory[] @relation("SalaryToSalaryHistory")
+}
+
+model SalaryHistory {
+  id             Int      @id @default(autoincrement())
+  employeeId     Int
+  salaryId       Int
+  previousSalary Float
+  year           Int
+  createdAt      DateTime @default(now())
+
+  userProfile UserProfile @relation("UserSalaryHistoryRelation", fields: [employeeId], references: [id])
+  salary      Salary      @relation("SalaryToSalaryHistory", fields: [salaryId], references: [id])
+}
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  account   Int
+  amount    Float
+  reason    String
+  createdAt DateTime @default(now())
+
+  userProfile UserProfile @relation("ExpenseRelation", fields: [account], references: [id])
+}
+
+model CV {
+  id            Int          @id @default(autoincrement())
+  name          String
+  file          Bytes
+  userProfileId Int?
+  UserProfile   UserProfile? @relation("CVRelation", fields: [userProfileId], references: [id])
+}
+
+model TypeOfExpense {
+  id            Int          @id @default(autoincrement())
+  name          String
+  description   String
+  userProfileId Int?
+  createdAt     DateTime     @default(now())
+  userProfile   UserProfile? @relation("typeofExpenseRelation", fields: [userProfileId], references: [id])
+}
+
+model Comments {
+  id            Int          @id @default(autoincrement())
+  text          String
+  createdAt     DateTime     @default(now())
+  userProfileId Int?
+  UserProfile   UserProfile? @relation("CommentsRelation", fields: [userProfileId], references: [id])
+}
