@@ -114,17 +114,21 @@ export const GET = withAuth(async (req, {params}) => {
         const { totalWFH, wfh: WRHdata } = userWFHData;
 
         const approved = userWFHData.wfh.filter((wfh) => wfh.status === true);
-        const pending = userWFHData.wfh.filter((wfh) => wfh.status === null || wfh.status === false);
+        const pending = userWFHData.wfh.filter((wfh) => wfh.status === null);
+        const rejected = userWFHData.wfh.filter((wfh) => wfh.status === false);
 
         const approvedCount = approved.length;
         const pendingCount = pending.length;
+        const rejectedCount = rejected.length;
 
         return new Response(
             JSON.stringify({
                 approved,
                 approvedCount,
                 pending,
-                pendingCount
+                pendingCount,
+                rejected,
+                rejectedCount,
             }),
             {
                 status: 200,

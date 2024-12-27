@@ -165,17 +165,21 @@ export const GET = withAuth(async (req, {params}) => {
 
         // Separate the approved and pending leave records
         const approved = leaveRecords.filter((leave) => leave.status === true);
-        const pending = leaveRecords.filter((leave) => leave.status === null || leave.status === false);
+        const pending = leaveRecords.filter((leave) => leave.status === null);
+        const cancelled = leaveRecords.filter((leave) => leave.status === false);
 
         const approvedCount = approved.length;
         const pendingCount = pending.length;
+        const cancelledCount = cancelled.length;
 
         return new Response(
             JSON.stringify({
                 approved,
                 approvedCount,
                 pending,
-                pendingCount
+                pendingCount,
+                cancelled,
+                cancelledCount
             }),
             { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
