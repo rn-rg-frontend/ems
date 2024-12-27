@@ -6,7 +6,7 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
         const { id } = params;
         const body = await req.json();
 
-        const { status, userProfile } = body;
+        const { status } = body;
 
         if (status === undefined) {
             return new Response(
@@ -18,17 +18,64 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
             );
         }
 
-        const updateWFH = await prisma.wFHtable.update({
+        const wfhRecord = await prisma.wFHtable.findUnique({
+            where: { id: Number(id) },
+            include: { userProfile: true },
+        });
+
+        if (!wfhRecord || !wfhRecord.userProfile) {
+            return new Response(
+                JSON.stringify({ success: false, message: 'WFH record or user profile not found' }),
+                {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+
+        const { totalWFH } = wfhRecord.userProfile;
+
+        if (status === true) {
+            const updatedUserProfile = await prisma.userProfile.update({
+                where: { id: wfhRecord.userProfileId },
+                data: {
+                    totalWFH: totalWFH + 1, 
+                },
+            });
+
+            const updatedWFH = await prisma.wFHtable.update({
+                where: { id: Number(id) },
+                data: {
+                    status: status, 
+                },
+            });
+
+            return new Response(
+                JSON.stringify({
+                    success: true,
+                    data: {
+                        updatedWFH,
+                        updatedTotalWFH: updatedUserProfile.totalWFH,
+                    },
+                }),
+                {
+                    status: 200,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+
+        const updatedWFH = await prisma.wFHtable.update({
             where: { id: Number(id) },
             data: {
                 status: status,
             },
         });
 
-
         return new Response(
             JSON.stringify({
-                    updateWFH,               
+                success: true,
+                data: updatedWFH,
             }),
             {
                 status: 200,
@@ -44,7 +91,8 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
             }
         );
     }
-})
+});
+
 
 export const DELETE = withAdminAuth(async (req, { params }) => {
     try {

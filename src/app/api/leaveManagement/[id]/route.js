@@ -3,18 +3,65 @@ import { withAdminAuth, withAuth } from "@/lib/middleware";
 
 export const PATCH = withAdminAuth(async (req, { params }) => {
     try {
-        const params1 = await params
+        const params1 = await params;
 
         const id = params1.id;
         const body = await req.json();
 
-        const { status, userProfile } = body;
+        const { status } = body; 
 
-        if (status === undefined || !userProfile || userProfile.totalLeave === undefined) {
+        if (status === undefined) {
             return new Response(
-                JSON.stringify({ success: false, message: 'Missing required fields' }),
+                JSON.stringify({ success: false, message: 'Missing required field: status' }),
                 {
                     status: 400,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+
+        const leaveRecord = await prisma.leaveTable.findUnique({
+            where: { id: Number(id) },
+            include: { userProfile: true },
+        });
+
+        if (!leaveRecord || !leaveRecord.userProfile) {
+            return new Response(
+                JSON.stringify({ success: false, message: 'Leave record not found' }),
+                {
+                    status: 404,
+                    headers: { 'Content-Type': 'application/json' },
+                }
+            );
+        }
+
+        const { totalLeave } = leaveRecord.userProfile;
+
+        if (status === true) {
+            const updatedUserProfile = await prisma.userProfile.update({
+                where: { id: leaveRecord.userProfileId },
+                data: {
+                    totalLeave: totalLeave - leaveRecord.totalLeaves,
+                },
+            });
+
+            const updatedLeave = await prisma.leaveTable.update({
+                where: { id: Number(id) },
+                data: {
+                    status: status, 
+                },
+            });
+
+            return new Response(
+                JSON.stringify({
+                    success: true,
+                    data: {
+                        updatedLeave,
+                        updatedTotalLeave: updatedUserProfile.totalLeave,
+                    },
+                }),
+                {
+                    status: 200,
                     headers: { 'Content-Type': 'application/json' },
                 }
             );
@@ -27,20 +74,10 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
             },
         });
 
-        const updatedUserProfile = await prisma.userProfile.update({
-            where: { id: updatedLeave.userProfileId },
-            data: {
-                totalLeave: userProfile.totalLeave,
-            },
-        });
-
         return new Response(
             JSON.stringify({
                 success: true,
-                data: {
-                    updatedLeave,
-                    totalLeave: updatedUserProfile.totalLeave,
-                },
+                data: updatedLeave,
             }),
             {
                 status: 200,
@@ -56,7 +93,7 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
             }
         );
     }
-})
+});
 
 export const DELETE = withAdminAuth(async (request, context) => {
     try {
@@ -84,7 +121,6 @@ export const DELETE = withAdminAuth(async (request, context) => {
         );
       }
   
-      // First check if the leave record exists
       const existingLeave = await prisma.leaveTable.findUnique({
         where: { id: numericId },
       });
@@ -163,7 +199,6 @@ export const GET = withAuth(async (req, {params}) => {
             );
         }
 
-        // Separate the approved and pending leave records
         const approved = leaveRecords.filter((leave) => leave.status === true);
         const pending = leaveRecords.filter((leave) => leave.status === null);
         const cancelled = leaveRecords.filter((leave) => leave.status === false);
