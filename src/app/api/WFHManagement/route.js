@@ -5,17 +5,36 @@ export const GET = withAdminAuth(async (req, { params }) => {
     try {
         const WFH = await prisma.wFHtable.findMany({
             select: {
-                id: true,
-                userProfileId: true,
-                date: true,
-                status: true,
-                
-            }
-        })
+              id: true,
+              userProfileId: true,
+              date: true,
+              status: true,
+              userProfile: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          });
+            
+          const formattedWFH = WFH.map((record) => ({
+            id: record.id,
+            userProfileId: record.userProfileId,
+            date: record.date,
+            status: record.status,
+            name: record.userProfile.name, 
+          }));
+          
+         
+          
+          
+          
+          
+          
 
         return new Response(JSON.stringify({
             success: true,
-            data: WFH,
+            data: formattedWFH,
         }), {
             status: 200,
             headers: {

@@ -1,5 +1,7 @@
+'use client'
 import CurretnEmployee from '@/components/Employees/CurretnEmployee'
 import React from 'react'
+
 
 function SelectedEmployee() {
   return (

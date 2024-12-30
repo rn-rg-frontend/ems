@@ -16,7 +16,7 @@ const authOptions = {
             userName: credentials.username,
             password: credentials.password,
           });
-          
+          console.log("API Response:", response.data);
           const userData = response.data;
           
           if (response.status === 200 && userData) {
@@ -56,6 +56,5 @@ const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-// Export GET and POST handlers for Next.js App Router
 export const GET = NextAuth(authOptions);
 export const POST = NextAuth(authOptions);

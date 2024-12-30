@@ -1,9 +1,12 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { Button } from '../ui/button'
 import { MoveLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
+import { useEffect } from 'react'
+import { getUserData } from '../services/api'
 import {
     Dialog,
     DialogContent,
@@ -17,7 +20,32 @@ import { Label } from '../ui/label'
 import { Input } from '../ui/input'
 
 function CurretnEmployee() {
+    const {data: session} = useSession()
+    const [empData, setEmpData] = useState([]);
+ 
+    // useEffect(() => {
+    //         const fetchUsers = async () => {
+    //             if (!session) {
+    //                 console.log("User is not authenticated");
+    //                 // setLoading(false);
+    //                 return;
+    //             }
+    //             try {
+    //                 const response = await getUserData(session.user.accessToken, id); // Access the token from session
+    //                 setEmpData(response.data);
+    //                 console.log(response.data)
+    //             } catch (error) {
+    //                 // setError(error.message);
+    //                 console.log(error)
+    //             } finally {
+    //                 // setLoading(false);
+    //             }
+    //         };
+    
+    //         fetchUsers();
+    //     }, [session]); 
     const router = useRouter()
+    // const { id } = router.query; 
     const goToLeaves = () => {
         router.push('/admin/employees/1/leaves')
     }

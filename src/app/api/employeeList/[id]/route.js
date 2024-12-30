@@ -31,7 +31,13 @@ export const GET = withAuth(async (req, {params}) => {
                 endDate: true,
                 emergencyContact: true,
                 medicalHistory: true,
-                createdAt: true,                
+                createdAt: true,  
+                salary: {
+                    select: {
+                      salary: true,
+                      id: true,
+                    },
+                  },            
             },
         })
         const totalApprovedWFH = await prisma.wFHtable.count({

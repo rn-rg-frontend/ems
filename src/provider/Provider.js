@@ -1,20 +1,23 @@
 'use client'
 
-import { createContext, useContext, useState } from "react"
+import { createContext, useContext, useState } from "react";
+import React from "react";
 
-const EmployeeContext = createContext()
+const EmployeeContext = createContext();
 
-export const useProvider = () =>  useContext(EmployeeContext)
+export const useProvider = () => useContext(EmployeeContext);
 
-import React from 'react'
+function EmployeeProvider({ children }) {
+  console.log(children); 
 
-function EmployeeProvider({children}) {
-    const [selectedEmployee,setSelectedEmployee] = useState() 
+  const [selectedEmployee, setSelectedEmployee] = useState();
+  const [employeeId, setEmployeeId] = useState(); 
+
   return (
-    <EmployeeContext.Provider  value={{selectedEmployee,setSelectedEmployee}}>
-        {children}
+    <EmployeeContext.Provider value={{ selectedEmployee, setSelectedEmployee, employeeId, setEmployeeId }}>
+      {children}
     </EmployeeContext.Provider>
-  )
+  );
 }
 
-export default EmployeeProvider
+export default EmployeeProvider;

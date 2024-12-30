@@ -6,9 +6,9 @@ export const GET = withAdminAuth(async (request, context) => {
     const userProfiles = await prisma.userProfile.findMany({
       select: {
         id: true,
-        name: true, 
+        name: true,
         totalLeave: true,
-        leaves: { 
+        leaves: {
           select: {
             id: true,
             leaveType: true,
@@ -21,10 +21,28 @@ export const GET = withAdminAuth(async (request, context) => {
       },
     });
     
+    const flattenedData = userProfiles.flatMap((profile) =>
+      profile.leaves
+        .filter((leave) => leave.status === null) 
+        .map((leave) => ({
+          id: profile.id,
+          name: profile.name,
+          totalLeave: profile.totalLeave,
+          leaveId: leave.id,
+          leaveType: leave.leaveType,
+          startDate: leave.startDate,
+          endDate: leave.endDate,
+          totalLeaves: leave.totalLeaves,
+          status: leave.status,
+        }))
+    );
+    
+    console.log(flattenedData);
+    
     
 
     return new Response(JSON.stringify(
-      userProfiles,
+      flattenedData,
     ), {
       status: 200,
       headers: {

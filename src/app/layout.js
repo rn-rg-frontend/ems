@@ -41,6 +41,7 @@ import "./globals.css";
 import Navbar from "@/components/common/Navbar";
 import Sidebar from "@/components/common/Sidebar";
 import AuthProvider from "@/provider/sessionProvider";
+import { ToastContainer, toast } from 'react-toastify';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,13 +63,13 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* Wrap only the client-side parts with SessionProvider */}
-    
-          {/* <Navbar />
-          <Sidebar /> */}
-          <AuthProvider>
 
-          {children}
-          </AuthProvider>
+        {/* <Navbar />
+          <Sidebar /> */}
+        <AuthProvider>
+            {children}
+            <ToastContainer />
+        </AuthProvider>
       </body>
     </html>
   );

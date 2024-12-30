@@ -2,97 +2,100 @@ import prisma from "@/lib/prisma";
 import { withAdminAuth, withAuth } from "@/lib/middleware";
 
 export const PATCH = withAdminAuth(async (req, { params }) => {
-    try {
-        const params1 = await params;
+  try {
+      const params1 = await params;
 
-        const id = params1.id;
-        const body = await req.json();
+      const id = params1.id;
+      const body = await req.json();
 
-        const { status } = body; 
+      const { status } = body; 
 
-        if (status === undefined) {
-            return new Response(
-                JSON.stringify({ success: false, message: 'Missing required field: status' }),
-                {
-                    status: 400,
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-        }
+      if (status === undefined) {
+          return new Response(
+              JSON.stringify({ success: false, message: 'Missing required field: status' }),
+              {
+                  status: 400,
+                  headers: { 'Content-Type': 'application/json' },
+              }
+          );
+      }
 
-        const leaveRecord = await prisma.leaveTable.findUnique({
-            where: { id: Number(id) },
-            include: { userProfile: true },
-        });
+      const leaveRecord = await prisma.leaveTable.findUnique({
+          where: { id: Number(id) },
+          include: { userProfile: true },
+      });
 
-        if (!leaveRecord || !leaveRecord.userProfile) {
-            return new Response(
-                JSON.stringify({ success: false, message: 'Leave record not found' }),
-                {
-                    status: 404,
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-        }
+      if (!leaveRecord || !leaveRecord.userProfile) {
+          return new Response(
+              JSON.stringify({ success: false, message: 'Leave record not found' }),
+              {
+                  status: 404,
+                  headers: { 'Content-Type': 'application/json' },
+              }
+          );
+      }
 
-        const { totalLeave } = leaveRecord.userProfile;
+      const { totalLeave } = leaveRecord.userProfile;
 
-        if (status === true) {
-            const updatedUserProfile = await prisma.userProfile.update({
-                where: { id: leaveRecord.userProfileId },
-                data: {
-                    totalLeave: totalLeave - leaveRecord.totalLeaves,
-                },
-            });
+       if (status === true) {
+          const updatedUserProfile = await prisma.userProfile.update({
+              where: { id: leaveRecord.userProfileId },
+              data: {
+                  totalLeave: totalLeave - leaveRecord.totalLeaves,
+              },
+          });
 
-            const updatedLeave = await prisma.leaveTable.update({
-                where: { id: Number(id) },
-                data: {
-                    status: status, 
-                },
-            });
+          const updatedLeave = await prisma.leaveTable.update({
+              where: { id: Number(id) },
+              data: {
+                  status: status,
+              },
+          });
 
-            return new Response(
-                JSON.stringify({
-                    success: true,
-                    data: {
-                        updatedLeave,
-                        updatedTotalLeave: updatedUserProfile.totalLeave,
-                    },
-                }),
-                {
-                    status: 200,
-                    headers: { 'Content-Type': 'application/json' },
-                }
-            );
-        }
+          return new Response(
+              JSON.stringify({
+                  success: true,
+                  message: "Leave request approved", // Send message for approval
+                  data: {
+                      updatedLeave,
+                      updatedTotalLeave: updatedUserProfile.totalLeave,
+                  },
+              }),
+              {
+                  status: 200,
+                  headers: { 'Content-Type': 'application/json' },
+              }
+          );
+      }
 
-        const updatedLeave = await prisma.leaveTable.update({
-            where: { id: Number(id) },
-            data: {
-                status: status,
-            },
-        });
+      // If status is false, reject leave without modifying totalLeave
+      const updatedLeave = await prisma.leaveTable.update({
+          where: { id: Number(id) },
+          data: {
+              status: status,
+          },
+      });
 
-        return new Response(
-            JSON.stringify({
-                success: true,
-                data: updatedLeave,
-            }),
-            {
-                status: 200,
-                headers: { 'Content-Type': 'application/json' },
-            }
-        );
-    } catch (error) {
-        return new Response(
-            JSON.stringify({ success: false, message: error.message }),
-            {
-                status: 500,
-                headers: { 'Content-Type': 'application/json' },
-            }
-        );
-    }
+      return new Response(
+          JSON.stringify({
+              success: true,
+              message: "Leave request rejected", // Send message for rejection
+              data: updatedLeave,
+          }),
+          {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' },
+          }
+      );
+  } catch (error) {
+      return new Response(
+          JSON.stringify({ success: false, message: error.message }),
+          {
+              status: 500,
+              headers: { 'Content-Type': 'application/json' },
+          }
+      );
+  }
 });
 
 export const DELETE = withAdminAuth(async (request, context) => {

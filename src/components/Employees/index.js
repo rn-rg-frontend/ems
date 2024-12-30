@@ -21,58 +21,28 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 import { MoveLeft, Pencil } from 'lucide-react';
 import { Camera } from 'lucide-react';
-const randomArray = [
-    { name: "Fiona Taylor", id: 1, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Bob Harris", id: 2, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Jack Martin", id: 3, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "George Anderson", id: 4, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Charlie Smith", id: 5, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Ethan Brown", id: 6, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "George Anderson", id: 7, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Jack Johnson", id: 8, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Hannah Martin", id: 9, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
-    { name: "Diana Harris", id: 10, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" }
-];
-
+import { addEmployees } from '../services/api';
 
 function Employees() {
     const [userList, setUserList] = useState([])
     const {data: session}= useSession()
     const { setSelectedEmployee } = useProvider();
     const [addEmployee, setAddEmployee] = useState(false)
-    const [editPersonal, setEditPersonal] = useState(false)
+    const [editPersonal, setEditPersonal] = useState(false);
     const [editContact, setEditContact] = useState(false)
     const [imagePreview, setImagePreview] = useState(null);
-    // const [employeeDetails, setEmployeeDetails] = useState({
-    //     personalInfo: {
-    //         name: "John Doe",
-    //         designation: "Software Engineer",
-    //         dateOfJoining: "2021-06-15",
-    //         emailID: "john.doe@example.com",
-    //         salary: "75000",
-    //     },
-    //     additionalDetails: {
-    //         contactDetails: "+1-234-567-890",
-    //         dateOfBirth: "1990-04-25",
-    //         highestEducation: "Master's Degree in Computer Science",
-    //         institute: "XYZ University",
-    //         aadharCard: "1234-5678-9012",
-    //         pan: "ABCDE1234F",
-    //         bloodGroup: "O+",
-    //     },
-    //     otherDetails: {
-    //         homeAddress: "123 Main Street, Springfield, IL, USA",
-    //         medicalHistoryAndAllergy: "None",
-    //         endDate: "N/A",
-    //         emergencyContact: {
-    //             name: "Jane Doe",
-    //             contact: "+1-345-678-901",
-    //             relationship: "Spouse",
-    //         },
-    //     },
-    // }
-    // )
-    const [employeeDetails, setEmployeeDetails] = useState([])
+  
+
+    const [employeeDetails, setEmployeeDetails] = useState({})
+    
+    const handleDetailsChange = (field, value) => {
+        setEmployeeDetails((prev) => ({
+            ...prev,
+            [field]: value,
+        }));
+    };
+    
+
     useEffect(() => {
         const fetchUsers = async () => {
             if (!session) {
@@ -81,7 +51,7 @@ function Employees() {
                 return;
             }
             try {
-                const response = await getUserList(session.user.accessToken); // Access the token from session
+                const response = await getUserList(session.user.accessToken); 
                 setUserList(response.data);
                 setEmployeeDetails(response.data)
                 console.log(response.data)
@@ -97,146 +67,233 @@ function Employees() {
     }, [session]); 
 
 
-    const handleImageChange = (e) => {
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = () => reject("Error converting file to base64");
+            reader.readAsDataURL(file);
+        });
+    };
+    
+    const handleImageChange = async (e) => {
         const file = e.target.files[0];
         if (file) {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            setImagePreview(reader.result);
-          };
-          reader.readAsDataURL(file);
+            try {
+                const base64Image = await convertToBase64(file);
+                setImagePreview(base64Image); // Save to state or use as needed
+            } catch (error) {
+                console.error("Error converting image to base64:", error);
+            }
         }
-      };
-      
+    };
 
     const ChagePersonalDetails = (key, val) => {
         if (editPersonal) {
             setEmployeeDetails(prev => ({ ...prev, personalInfo: { ...prev.personalInfo, [key]: val } }))
         }
     }
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        console.log(employeeDetails)
-        setEditPersonal(false)
-    }
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     console.log(empDetails);
+    //     // Handle form submission
+    // };
+    // const [empDetails, setEmpDetails] = useState({
+    //     photo: '',
+    //     name: '',
+    //     designation: '',
+    //     dateOfJoining: '',
+    //     emailID: '',
+    //     salary: '',
+    //     institute: '',
+    //     dateOfBirth: '',
+    //     aadharCard: '',
+    //     pan: '',
+    //     bloodGroup: '',
+    //     homeAddress: '',
+    //     phone: '',
+    //     emergencyPhone: '',
+    //     userName: '',
+    //     password: '',
+    //     highestEducation: '',
+    //     medicalHistory: ''
+    // });
+    const [empDetails, setEmpDetails] = useState({
+        photo: '', // Replace with actual base64 or a placeholder
+        name: '',
+        designation: '',
+        dateOfJoining: '',
+        emailID: '',
+        salary: '',
+        institute: '',
+        dateOfBirth: '',
+        aadharCard: '',
+        pan: '',
+        bloodGroup: '',
+        homeAddress: '123 Main Street, City, State, Country',
+        phone: '',
+        emergencyPhone: '',
+        userName: '',
+        password: '',
+        highestEducation: '',
+        medicalHistory: '',
+        endDate: ''
+    });
+    
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    
+        const employeeData = {
+            userName: empDetails.userName,
+            password: empDetails.password,
+            isAdmin: false,
+            name: empDetails.name,
+            photo: imagePreview || '', // Base64-encoded photo or fallback
+            designation: empDetails.designation,
+            dateOfJoining: empDetails.dateOfJoining,
+            email: empDetails.emailID,
+            contactDetails: empDetails.phone,
+            DOB: empDetails.dateOfBirth,
+            highestEducation: empDetails.highestEducation,
+            instituteName: empDetails.institute,
+            aadharCard: empDetails.aadharCard,
+            panCard: empDetails.pan,
+            bloodGroup: empDetails.bloodGroup,
+            totalLeave: 20, // Default or dynamic value
+            address: empDetails.homeAddress,
+            endDate: empDetails.endDate,
+            emergencyContact: empDetails.emergencyPhone,
+            medicalHistory: empDetails.medicalHistory,
+            salaryAmount: empDetails.salary,
+        };
+    
+        try {
+            const response = await addEmployees(session.user.accessToken, employeeData);
+            console.log('Employee added successfully:', response);
+            setEditPersonal(false); 
+        } catch (error) {
+            console.error('Error adding employee:', error);
+        }
+    };
+    
+    
     if (addEmployee) {
         return (
             <div className='p-2'>
                 <div className='flex w-4/5 justify-between m-auto border-b p-2'>
                     <h1 className='text-2xl flex gap-1 items-center font-bold' onClick={() => setAddEmployee(false)}><MoveLeft /> <span>All Employees</span></h1>
                 </div>
-                <div className=' w-4/5 m-auto grid  grid-cols-2 grid-rows-2 gap-2 mt-2 items-start justify-start'>
-                    <form className='w-11/12 flex flex-col gap-2' >
-                        <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Personal Details <Pencil onClick={() => setEditPersonal(true)} className='ms-auto w-5 h-5' /></p>
-                        <div className="flex flex-col items-center gap-4">
-                            <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                                {imagePreview ? (
-                                    <img
-                                        src={imagePreview}
-                                        alt="Profile Preview"
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <Camera className="w-12 h-12 text-gray-400" />
-                                )}
-                            </div>
-                            <div>
-                                <Input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={handleImageChange}
-                                    className="hidden"
-                                    id="profile-image"
-                                />
-                                <Label
-                                    htmlFor="profile-image"
-                                    className="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700"
-                                >
-                                    Upload Photo
-                                </Label>
-                            </div>
-                        </div>
-
-
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Name </p>
-                            <Input name='name' onChange={(e) => ChagePersonalDetails('name', e.target.value)} value={employeeDetails.name} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Designation </p>
-                            <Input name='designation' onChange={(e) => ChagePersonalDetails('designation', e.target.value)} value={employeeDetails.designation} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Date of Joining </p>
-                            <Input name='dateOfJoining' onChange={(e) => ChagePersonalDetails('dateOfJoining', e.target.value)} value={employeeDetails.dateOfJoining} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Email ID </p>
-                            <Input onChange={(e) => ChagePersonalDetails('emailID', e.target.value)} value={employeeDetails.emailID} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Salary </p>
-                            <Input onChange={(e) => ChagePersonalDetails('salary', e.target.value)} value={employeeDetails.salary} className=' col-span-3' />
-                        </div>
-
-                        <Button className='hover:border-rgtheme hover:text-rgtheme border-black' variant='outline'>Submit</Button>
-
-                    </form>
-                    <div className='w-11/12 flex flex-col gap-2 '>
-                        <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Additional Details <Pencil className='ms-auto w-5 h-5' /></p>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p> Institute </p>
-                            <Input defaultValue={employeeDetails.additionalDetails.institute} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Date of birth </p>
-                            <Input defaultValue={employeeDetails.additionalDetails.dateOfBirth} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p> Aadhar Card No </p>
-                            <Input defaultValue={employeeDetails.additionalDetails.aadharCard} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Pan No </p>
-                            <Input defaultValue={employeeDetails.additionalDetails.pan} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p> Blood group </p>
-                            <Input defaultValue={employeeDetails.additionalDetails.bloodGroup} className=' col-span-3' />
-                        </div>
-                        <Button className='hover:border-rgtheme hover:text-rgtheme border-black' variant='outline'>Submit</Button>
+                <form onSubmit={handleSubmit} className=' w-4/5 m-auto grid  grid-cols-2 grid-rows-2 gap-2 mt-2 items-start justify-start'>
+            <div className='w-11/12 flex flex-col gap-2'>
+                <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Personal Details <Pencil onClick={() => setEditPersonal(true)} className='ms-auto w-5 h-5' /></p>
+                <div className="flex flex-col items-center gap-4">
+                    <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                        {imagePreview ? (
+                            <img src={imagePreview} alt="Profile Preview" className="w-full h-full object-cover" />
+                        ) : (
+                            <Camera className="w-12 h-12 text-gray-400" />
+                        )}
                     </div>
-
-                    <div className='w-11/12 flex flex-col gap-2'>
-                        <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Contact Details <Pencil className='ms-auto w-5 h-5' /></p>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Address </p>
-                            <Input defaultValue={employeeDetails.otherDetails.homeAddress} className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Phone No </p>
-                            <Input defaultValue={'9172778344'} className=' col-span-3' />
-                        </div>
-                        <div className='flex w-11/12 mx-auto items-center'>
-                            <p className='border border-gray-300 flex-grow'></p>
-                            <p className='mx-2'>Emergency Contact</p>
-                            <p className='border border-gray-300 flex-grow'></p>
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Name </p>
-                            <Input className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Phone No </p>
-                            <Input className=' col-span-3' />
-                        </div>
-                        <div className='grid grid-cols-4 items-center text-sm'>
-                            <p>Relationship </p>
-                            <Input className=' col-span-3' />
-                        </div>
-                        <Button className='hover:border-rgtheme hover:text-rgtheme border-black' variant='outline'>Submit</Button>
+                    <div>
+                        <Input type="file" accept="image/*" onChange={handleImageChange} className="hidden" id="profile-image" />
+                        <Label htmlFor="profile-image" className="cursor-pointer inline-flex items-center px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-700">
+                            Upload Photo
+                        </Label>
                     </div>
                 </div>
+
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Name </p>
+                    <Input name='name' onChange={(e) => handleDetailsChange('name', e.target.value)} value={employeeDetails.name} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Designation </p>
+                    <Input name='designation' onChange={(e) => handleDetailsChange('designation', e.target.value)} value={employeeDetails.designation} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Date of Joining </p>
+                    <Input type='date' name='dateOfJoining' onChange={(e) => handleDetailsChange('dateOfJoining', e.target.value)} value={employeeDetails.dateOfJoining} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Email ID </p>
+                    <Input type="email" onChange={(e) => handleDetailsChange('emailID', e.target.value)} value={employeeDetails.emailID} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Salary </p>
+                    <Input onChange={(e) => handleDetailsChange('salary', e.target.value)} value={employeeDetails.salary} className=' col-span-3' />
+                </div>
+            </div>
+
+            <div className='w-11/12 flex flex-col gap-2'>
+                <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Additional Details <Pencil className='ms-auto w-5 h-5' /></p>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Highest Education </p>
+                    <Input onChange={(e) => handleDetailsChange('highestEducation', e.target.value)} value={employeeDetails.highestEducation} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Institute </p>
+                    <Input onChange={(e) => handleDetailsChange('institute', e.target.value)} value={employeeDetails.institute} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Date of birth </p>
+                    <Input type="date" onChange={(e) => handleDetailsChange('dateOfBirth', e.target.value)} value={employeeDetails.dateOfBirth} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Aadhar Card No </p>
+                    <Input onChange={(e) => handleDetailsChange('aadharCard', e.target.value)} value={employeeDetails.aadharCard} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Pan No </p>
+                    <Input onChange={(e) => handleDetailsChange('pan', e.target.value)} value={employeeDetails.pan} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Blood group </p>
+                    <Input onChange={(e) => handleDetailsChange('bloodGroup', e.target.value)} value={employeeDetails.bloodGroup} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Medical history</p>
+                    <Input onChange={(e) => handleDetailsChange('medicalHistory', e.target.value)} value={employeeDetails.medicalHistory} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>End Date</p>
+                    <Input type="date" onChange={(e) => handleDetailsChange('endDate', e.target.value)} value={employeeDetails.endDate} className=' col-span-3' />
+                </div>
+            </div>
+
+            <div className='w-11/12 flex flex-col gap-2'>
+                <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Contact Details <Pencil className='ms-auto w-5 h-5' /></p>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Address </p>
+                    <Input onChange={(e) => handleDetailsChange('homeAddress', e.target.value)} value={employeeDetails.homeAddress} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Phone No </p>
+                    <Input onChange={(e) => handleDetailsChange('phone', e.target.value)} value={employeeDetails.phone} className=' col-span-3' />
+                </div>
+                <div className='flex w-11/12 mx-auto items-center'>
+                    <p className='border border-gray-300 flex-grow'></p>
+                    <p className='mx-2'>Emergency Contact</p>
+                    <p className='border border-gray-300 flex-grow'></p>
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Phone No </p>
+                    <Input onChange={(e) => handleDetailsChange('emergencyPhone', e.target.value)} value={employeeDetails.emergencyPhone} className=' col-span-3' />
+                </div>
+            </div>
+
+            <div className='w-11/12 flex flex-col gap-2'>
+                <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Login Details <Pencil className='ms-auto w-5 h-5' /></p>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Username </p>
+                    <Input onChange={(e) => handleDetailsChange('userName', e.target.value)} value={employeeDetails.userName} className=' col-span-3' />
+                </div>
+                <div className='grid grid-cols-4 items-center text-sm'>
+                    <p>Password</p>
+                    <Input onChange={(e) => handleDetailsChange('password', e.target.value)} value={employeeDetails.password} className=' col-span-3' type="password" />
+                </div>
+                <Button className='hover:border-rgtheme hover:text-rgtheme border-black' variant='outline'>Submit</Button>
+            </div>
+        </form>
             </div>
         )
     }
