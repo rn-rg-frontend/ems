@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Input } from '../ui/input'
 import { Search } from 'lucide-react'
 import Image from 'next/image';
+import { useEffect } from 'react';
 import {
     Card,
     CardContent,
@@ -12,7 +13,9 @@ import {
     CardTitle,
 } from "@/components/ui/card"
 import { Label } from '@/components/ui/label';
-
+import axios from 'axios';
+import { useSession } from "next-auth/react";
+import { getUserList } from '../services/api';
 import { useProvider } from '@/provider/Provider';
 import Link from 'next/link';
 import { Button } from '../ui/button';
@@ -31,41 +34,69 @@ const randomArray = [
     { name: "Diana Harris", id: 10, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" }
 ];
 
+
 function Employees() {
+    const [userList, setUserList] = useState([])
+    const {data: session}= useSession()
     const { setSelectedEmployee } = useProvider();
     const [addEmployee, setAddEmployee] = useState(false)
     const [editPersonal, setEditPersonal] = useState(false)
     const [editContact, setEditContact] = useState(false)
     const [imagePreview, setImagePreview] = useState(null);
-    const [employeeDetails, setEmployeeDetails] = useState({
-        personalInfo: {
-            name: "John Doe",
-            designation: "Software Engineer",
-            dateOfJoining: "2021-06-15",
-            emailID: "john.doe@example.com",
-            salary: "75000",
-        },
-        additionalDetails: {
-            contactDetails: "+1-234-567-890",
-            dateOfBirth: "1990-04-25",
-            highestEducation: "Master's Degree in Computer Science",
-            institute: "XYZ University",
-            aadharCard: "1234-5678-9012",
-            pan: "ABCDE1234F",
-            bloodGroup: "O+",
-        },
-        otherDetails: {
-            homeAddress: "123 Main Street, Springfield, IL, USA",
-            medicalHistoryAndAllergy: "None",
-            endDate: "N/A",
-            emergencyContact: {
-                name: "Jane Doe",
-                contact: "+1-345-678-901",
-                relationship: "Spouse",
-            },
-        },
-    }
-    )
+    // const [employeeDetails, setEmployeeDetails] = useState({
+    //     personalInfo: {
+    //         name: "John Doe",
+    //         designation: "Software Engineer",
+    //         dateOfJoining: "2021-06-15",
+    //         emailID: "john.doe@example.com",
+    //         salary: "75000",
+    //     },
+    //     additionalDetails: {
+    //         contactDetails: "+1-234-567-890",
+    //         dateOfBirth: "1990-04-25",
+    //         highestEducation: "Master's Degree in Computer Science",
+    //         institute: "XYZ University",
+    //         aadharCard: "1234-5678-9012",
+    //         pan: "ABCDE1234F",
+    //         bloodGroup: "O+",
+    //     },
+    //     otherDetails: {
+    //         homeAddress: "123 Main Street, Springfield, IL, USA",
+    //         medicalHistoryAndAllergy: "None",
+    //         endDate: "N/A",
+    //         emergencyContact: {
+    //             name: "Jane Doe",
+    //             contact: "+1-345-678-901",
+    //             relationship: "Spouse",
+    //         },
+    //     },
+    // }
+    // )
+    const [employeeDetails, setEmployeeDetails] = useState([])
+    useEffect(() => {
+        const fetchUsers = async () => {
+            if (!session) {
+                console.log("User is not authenticated");
+                // setLoading(false);
+                return;
+            }
+            try {
+                const response = await getUserList(session.user.accessToken); // Access the token from session
+                setUserList(response.data);
+                setEmployeeDetails(response.data)
+                console.log(response.data)
+            } catch (error) {
+                // setError(error.message);
+                console.log(error)
+            } finally {
+                // setLoading(false);
+            }
+        };
+
+        fetchUsers();
+    }, [session]); 
+
+
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -129,23 +160,23 @@ function Employees() {
 
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Name </p>
-                            <Input name='name' onChange={(e) => ChagePersonalDetails('name', e.target.value)} value={employeeDetails.personalInfo.name} className=' col-span-3' />
+                            <Input name='name' onChange={(e) => ChagePersonalDetails('name', e.target.value)} value={employeeDetails.name} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Designation </p>
-                            <Input name='designation' onChange={(e) => ChagePersonalDetails('designation', e.target.value)} value={employeeDetails.personalInfo.designation} className=' col-span-3' />
+                            <Input name='designation' onChange={(e) => ChagePersonalDetails('designation', e.target.value)} value={employeeDetails.designation} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Date of Joining </p>
-                            <Input name='dateOfJoining' onChange={(e) => ChagePersonalDetails('dateOfJoining', e.target.value)} value={employeeDetails.personalInfo.dateOfJoining} className=' col-span-3' />
+                            <Input name='dateOfJoining' onChange={(e) => ChagePersonalDetails('dateOfJoining', e.target.value)} value={employeeDetails.dateOfJoining} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Email ID </p>
-                            <Input onChange={(e) => ChagePersonalDetails('emailID', e.target.value)} value={employeeDetails.personalInfo.emailID} className=' col-span-3' />
+                            <Input onChange={(e) => ChagePersonalDetails('emailID', e.target.value)} value={employeeDetails.emailID} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Salary </p>
-                            <Input onChange={(e) => ChagePersonalDetails('salary', e.target.value)} value={employeeDetails.personalInfo.salary} className=' col-span-3' />
+                            <Input onChange={(e) => ChagePersonalDetails('salary', e.target.value)} value={employeeDetails.salary} className=' col-span-3' />
                         </div>
 
                         <Button className='hover:border-rgtheme hover:text-rgtheme border-black' variant='outline'>Submit</Button>
@@ -225,7 +256,7 @@ function Employees() {
             </div>
 
             <div className='mt-4 grid md:grid-cols-3 grid-cols-2 w-4/5 m-auto gap-2'>
-                {randomArray.map(i => <Link key={i.id} href={`/admin/employees/${i.id}`}> <Card className='cursor-pointer hover:shadow-lg border w-[95%] h-24 flex justify-center border-gray-300 rounded'>
+                {userList.map(i => <Link key={i.id} href={`/admin/employees/${i.id}`}> <Card className='cursor-pointer hover:shadow-lg border w-[95%] h-24 flex justify-center border-gray-300 rounded'>
                     <CardContent className='flex gap-2 p-2  items-center'>
                         <Image alt={i.name} src={'/image.png'} width={50} height={50} className='w-10 h-10 rounded-[50%]' />
                         <p className='text-lg'>{i.name}</p>

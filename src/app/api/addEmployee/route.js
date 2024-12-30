@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
 import { withAuth } from '@/lib/middleware';
 
-export const POST = withAuth(async (req, {params}) => {
+export async function POST(req, {params}) {
   try {
     const body = await req.json();
 
@@ -131,5 +131,5 @@ export const POST = withAuth(async (req, {params}) => {
       { status: 500 }
     );
   }
-})
+}
 

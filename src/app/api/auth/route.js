@@ -46,6 +46,7 @@ export async function POST(request) {
       }
     );
   } catch (error) {
+    console.log(error)
     return new Response(JSON.stringify({ error: "Something went wrong" }), {
       status: 500,
     });
