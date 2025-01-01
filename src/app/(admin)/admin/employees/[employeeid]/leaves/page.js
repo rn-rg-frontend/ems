@@ -1,11 +1,13 @@
+
 import EmployeeLeaves from '@/components/Employees/EmployeeLeaves'
 import EmployeeWfh from '@/components/Employees/EmployeeWfh'
 import React from 'react'
 
-function Leaves() {
+async function Leaves({params}) {
+  const {employeeid}  = await params;
   return (
     <div className='flex-grow'>
-        <EmployeeLeaves/>
+        <EmployeeLeaves employeeId={employeeid}/>
     </div>
   )
 }

@@ -55,7 +55,7 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
           return new Response(
               JSON.stringify({
                   success: true,
-                  message: "Leave request approved", // Send message for approval
+                  message: "Leave request approved", 
                   data: {
                       updatedLeave,
                       updatedTotalLeave: updatedUserProfile.totalLeave,
@@ -68,7 +68,6 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
           );
       }
 
-      // If status is false, reject leave without modifying totalLeave
       const updatedLeave = await prisma.leaveTable.update({
           where: { id: Number(id) },
           data: {
@@ -79,7 +78,7 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
       return new Response(
           JSON.stringify({
               success: true,
-              message: "Leave request rejected", // Send message for rejection
+              message: "Leave request rejected", 
               data: updatedLeave,
           }),
           {
@@ -198,7 +197,7 @@ export const GET = withAuth(async (req, {params}) => {
         if (leaveRecords.length === 0) {
             return new Response(
                 JSON.stringify({ success: false, message: 'No leaves found for the given user ID' }),
-                { status: 404, headers: { 'Content-Type': 'application/json' } }
+                { status: 201, headers: { 'Content-Type': 'application/json' } }
             );
         }
 

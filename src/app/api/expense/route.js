@@ -4,10 +4,10 @@ import { withAdminAuth } from "@/lib/middleware";
 export const POST = withAdminAuth(async (req) => {
   try {
     const body = await req.json();
-    
-    const { date, account, amount, reason } = body;
-    
-    if (!date || !account || !amount || !reason) {
+
+    const { date, account, amount, reason, typeOfExpenseId } = body;
+
+    if (!date || !account || !amount || !reason || !typeOfExpenseId) {
       return new Response(
         JSON.stringify({
           success: false,
@@ -26,6 +26,7 @@ export const POST = withAdminAuth(async (req) => {
         account,
         amount,
         reason,
+        typeOfExpenseId
       },
     });
 
@@ -51,46 +52,61 @@ export const POST = withAdminAuth(async (req) => {
       }
     );
   }
-  
+
 });
 
 
 export const GET = withAdminAuth(async (req) => {
-    try {
-        const transaction = await prisma.expense.findMany({
-            select: {
-                id: true,
-                date: true,
-                account: true,
-                amount: true,
-                reason: true,
-                userProfile: {
-                    select: {
-                        name: true,
-                    }
-                }
-            }
-        })
+  try {
+    const transaction = await prisma.expense.findMany({
+      select: {
+        id: true,
+        date: true,
+        account: true,
+        amount: true,
+        reason: true,
+        userProfile: {
+          select: {
+            name: true,
+          }
+        },
+        typeOfExpense: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    })
 
-        return new Response(
-            JSON.stringify({
-                success: true,
-                data: transaction,
-            }), {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-            }
-        )
-    } catch (error) {
-        return new Response(
-            JSON.stringify({
-                success: false,
-                error: error.message,
-            }), 
-            {
-                status: 500,
-                headers: { "Content-Type": "application/json" },
-            }
-        )
+    const formattedTransactions = transaction.map((record) => ({
+      id: record.id,
+      date: record.date,
+      account: record.account,
+      amount: record.amount,
+      reason: record.reason,
+      userName: record.userProfile?.name || null, 
+      typeOfExpenseName: record.typeOfExpense?.name || null, 
+    }));
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        data: formattedTransactions,
+      }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
     }
+    )
+  } catch (error) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: error.message,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    )
+  }
 });

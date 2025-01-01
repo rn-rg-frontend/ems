@@ -34,33 +34,33 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { toast } from "react-toastify"
-
-// const data = [
-//   { id: 1, employeeName: "Michael Davis", leaveType: "Maternity Leave", fromDate: "2023-04-22", toDate: "2023-04-26" },
-//   { id: 2, employeeName: "Michael Davis", leaveType: "Sick Leave", fromDate: "2023-05-23", toDate: "2023-05-30" },
-//   { id: 3, employeeName: "Jane Smith", leaveType: "Sick Leave", fromDate: "2023-09-17", toDate: "2023-09-20" },
-//   { id: 4, employeeName: "Chris Thomas", leaveType: "Paternity Leave", fromDate: "2024-12-29", toDate: "2025-01-04" },
-//   { id: 5, employeeName: "Michael Thomas", leaveType: "Annual Leave", fromDate: "2023-11-21", toDate: "2023-11-27" },
-//   { id: 6, employeeName: "Jane Anderson", leaveType: "Maternity Leave", fromDate: "2023-06-20", toDate: "2023-06-25" },
-//   { id: 7, employeeName: "Alex Miller", leaveType: "Paternity Leave", fromDate: "2023-12-09", toDate: "2023-12-11" },
-//   { id: 8, employeeName: "Laura Wilson", leaveType: "Annual Leave", fromDate: "2023-10-23", toDate: "2023-10-28" },
-//   { id: 9, employeeName: "Michael Moore", leaveType: "Annual Leave", fromDate: "2024-12-27", toDate: "2025-01-05" },
-//   { id: 10, employeeName: "Michael Taylor", leaveType: "Casual Leave", fromDate: "2023-05-21", toDate: "2023-05-23" }
-// ]
-
-
+import { approveRejectWfh } from "../services/api"
+import BeatLoader from 'react-spinners/BeatLoader'
 
 export default function WFHManagement() {
+  function formatDate(isoDateString) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' }; // Customize format as needed
+    return new Date(isoDateString).toLocaleDateString(undefined, options);
+  }
+  
   const {data: session} = useSession()
-  const [data, setData] = ([])
+  const [data, setData] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [text, setText] = useState("")
 
   const fetchWFHRequest = async () => {
     try {
+      setIsLoading(true)
       const response = await getWFHRequest(session?.user?.accessToken);
       console.log(response.data)
       setData(response.data)
+      if(response.data.length == 0 ){
+        setText("No records")
+      }
     } catch (error) {
       toast.error(error)
+    } finally{
+      setIsLoading(false)
     }
   }
 
@@ -82,19 +82,49 @@ export default function WFHManagement() {
       accessorKey: "date",
       header: "WFH Date",
       cell: ({ row }) => (
-        <div className="capitalize">{row.getValue("date")}</div>
+        <div className="capitalize">{formatDate(row.getValue("date"))}</div>
       ),
   
     }, 
     {
-      header: "Accept/Reject",
-      cell: ({ row }) => (
-        <div className="flex gap-2">
-          <Button variant='outline' className='border-green-500  hover:text-green-500'>Accept</Button>
-          <Button variant='outline' className='border-red-500  hover:text-red-500'>Reject</Button>
-        </div>
-      ),
-    },
+          accessorKey: "id",
+          header: "Request",
+          cell: ({ row }) => {
+    
+            const handleAction = async (status) => {
+              try {
+                const data = { status };
+                const response = await approveRejectWfh(session?.user?.accessToken, data, row.getValue("id"));
+             
+                console.log(response.data.status)
+    
+                toast.success(response.message)
+                fetchWFHRequest();
+              } catch (error) {
+                console.error("Error approving/rejecting", error);
+              }
+            };
+    
+            return (
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="border-green-500 hover:text-green-500"
+                  onClick={() => handleAction(true)}
+                >
+                  Accept
+                </Button>
+                <Button
+                  variant="outline"
+                  className="border-red-500 hover:text-red-500"
+                  onClick={() => handleAction(false)}
+                >
+                  Reject
+                </Button>
+              </div>
+            );
+          },
+        },
   
   
   ]
@@ -139,56 +169,48 @@ export default function WFHManagement() {
         />
 
       </div>
-      <div className="rounded-md border !mt-1">
-        <Table>
-          <TableHeader className='bg-rgtheme hover:bg-rgtheme'>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className='text-white font-bold' key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
+      <div className="rounded-md border !mt-1 relative">
+  {isLoading && (
+    <div className="absolute inset-0 h-96 bg-white/70 flex justify-center items-center z-10">
+      <BeatLoader />
+    </div>
+  )}
+  <Table>
+    <TableHeader className="bg-rgtheme hover:bg-rgtheme">
+      {table.getHeaderGroups().map((headerGroup) => (
+        <TableRow key={headerGroup.id}>
+          {headerGroup.headers.map((header) => (
+            <TableHead className="text-white font-bold" key={header.id}>
+              {header.isPlaceholder
+                ? null
+                : flexRender(header.column.columnDef.header, header.getContext())}
+            </TableHead>
+          ))}
+        </TableRow>
+      ))}
+    </TableHeader>
+    <TableBody>
+      {data && data.length ? (
+        table.getRowModel().rows.map((row) => (
+          <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+            {row.getVisibleCells().map((cell) => (
+              <TableCell key={cell.id}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
             ))}
-          </TableHeader>
-          <TableBody>
-            {data && data.length  ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+          </TableRow>
+        ))
+      ) : (
+        <TableRow>
+          <TableCell colSpan={columns.length} className="h-24 text-center">
+            {text}
+          </TableCell>
+        </TableRow>
+      )}
+    </TableBody>
+  </Table>
+</div>
+
     </div>
   )
 }

@@ -13,7 +13,7 @@ model UserProfile {
   password         String
   isAdmin          Boolean
   name             String
-  photo            Bytes
+  photo            Bytes?
   designation      String
   dateOfJoining    DateTime
   email            String
@@ -28,7 +28,7 @@ model UserProfile {
   endDate          DateTime
   emergencyContact String
   medicalHistory   String
-  totalLeave       Int
+  totalLeave       Float
   totalWFH         Int      @default(0)
   salaryId         Int?     @unique
   createdAt        DateTime @default(now())
@@ -39,7 +39,6 @@ model UserProfile {
   expense       Expense[]       @relation("ExpenseRelation")
   salaryhistory SalaryHistory[] @relation("UserSalaryHistoryRelation")
   cv            CV[]            @relation("CVRelation")
-  typeofexpense TypeOfExpense[] @relation("typeofExpenseRelation")
   comment       Comments[]       @relation("CommentsRelation")
 }
 
@@ -48,7 +47,7 @@ model LeaveTable {
   leaveType     String
   startDate     DateTime
   endDate       DateTime
-  totalLeaves   Int
+  totalLeaves   Float
   createdAt     DateTime @default(now())
   status        Boolean?
   userProfileId Int
@@ -96,17 +95,6 @@ model SalaryHistory {
   salary      Salary      @relation("SalaryToSalaryHistory", fields: [salaryId], references: [id])
 }
 
-model Expense {
-  id        Int      @id @default(autoincrement())
-  date      DateTime
-  account   Int
-  amount    Float
-  reason    String
-  createdAt DateTime @default(now())
-
-  userProfile UserProfile @relation("ExpenseRelation", fields: [account], references: [id])
-}
-
 model CV {
   id            Int          @id @default(autoincrement())
   name          String
@@ -114,15 +102,26 @@ model CV {
   userProfileId Int?
   UserProfile   UserProfile? @relation("CVRelation", fields: [userProfileId], references: [id])
 }
-
 model TypeOfExpense {
   id            Int          @id @default(autoincrement())
   name          String
   description   String
-  userProfileId Int?
   createdAt     DateTime     @default(now())
-  userProfile   UserProfile? @relation("typeofExpenseRelation", fields: [userProfileId], references: [id])
+  expenses      Expense[]    @relation("TypeOfExpenseToExpense") 
 }
+
+model Expense {
+  id            Int          @id @default(autoincrement())
+  date          DateTime
+  account       Int
+  typeOfExpenseId Int?      
+  amount        Float
+  reason        String
+  createdAt     DateTime     @default(now())
+  userProfile   UserProfile  @relation("ExpenseRelation", fields: [account], references: [id])
+  typeOfExpense TypeOfExpense? @relation("TypeOfExpenseToExpense", fields: [typeOfExpenseId], references: [id]) // Relation to TypeOfExpense
+}
+
 
 model Comments {
   id            Int          @id @default(autoincrement())

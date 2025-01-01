@@ -1,5 +1,5 @@
 'use client'
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -10,49 +10,62 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
+import { getSalary } from '../services/api';
+import { useSession } from 'next-auth/react';
+import { BeatLoader } from 'react-spinners/BeatLoader';
 
 const DataTableWithExport = ({setSelectedUser}) => {
+  const {data: session} = useSession();
   // Sample data
-  const data = [
-    { id: 1, employeeName: "Michael Davis", leaveType: "Maternity Leave", fromDate: "2023-04-22", toDate: "2023-04-26",salary:200 },
-    { id: 2, employeeName: "Michael Davis", leaveType: "Sick Leave", fromDate: "2023-05-23", toDate: "2023-05-30",salary:200 },
-    { id: 3, employeeName: "Jane Smith", leaveType: "Sick Leave", fromDate: "2023-09-17", toDate: "2023-09-20",salary:200 },
-    { id: 4, employeeName: "Chris Thomas", leaveType: "Paternity Leave", fromDate: "2024-12-29", toDate: "2025-01-04",salary:200 },
-    { id: 5, employeeName: "Michael Thomas", leaveType: "Annual Leave", fromDate: "2023-11-21", toDate: "2023-11-27",salary:200 },
-    { id: 6, employeeName: "Jane Anderson", leaveType: "Maternity Leave", fromDate: "2023-06-20", toDate: "2023-06-25",salary:200 },
-    { id: 7, employeeName: "Alex Miller", leaveType: "Paternity Leave", fromDate: "2023-12-09", toDate: "2023-12-11",salary:200 },
-    { id: 8, employeeName: "Laura Wilson", leaveType: "Annual Leave", fromDate: "2023-10-23", toDate: "2023-10-28",salary:200 },
-    { id: 9, employeeName: "Michael Moore", leaveType: "Annual Leave", fromDate: "2024-12-27", toDate: "2025-01-05",salary:200 },
-    { id: 10, employeeName: "Michael Taylor", leaveType: "Casual Leave", fromDate: "2023-05-21", toDate: "2023-05-23",salary:400 },
- 
-  ]
-  ;
+  
+
+  const [data, setdata] = useState([]);
+  
+    const fetchSalary = async (token) => {
+      try {
+        const response = await getSalary(token);
+        console.log(response.formattedSalary)
+        setdata(response.formattedSalary)
+      } catch (error) {
+        console.log("Unable to get Data")
+      }
+    }
+
+    useEffect(() => {
+      if(session?.user?.accessToken) {
+        fetchSalary(session?.user?.accessToken);
+      }
+    }, [session])
 
     const selectEmployee = (row) => {
-      console.log(row)
-      setSelectedUser(row)
+      console.log("employee id ",row.id)
+      setSelectedUser(row.id)
     }
  
 
 
   return (
     <div className="w-full max-w-4xl m-auto space-y-4">
-      
-
       <Table>
-        <TableHeader className='bg-rgtheme '>
+        <TableHeader className="bg-rgtheme">
           <TableRow>
-            <TableHead  className='text-white font-bold'>Emoployee Name</TableHead>
-            <TableHead className='text-white font-bold text-center'>Current Salary Per Month</TableHead>
+            <TableHead className="text-white font-bold">Employee Name</TableHead>
+            <TableHead className="text-white font-bold text-center">Current Salary Per Month</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((row) => (
-            <TableRow key={row.id} className='cursor-pointer' onClick={()=>selectEmployee(row)}>
-              <TableCell >{row.employeeName}</TableCell>
-              <TableCell className='text-center'>{row.salary}</TableCell>
+          {Array.isArray(data) && data.length > 0 ? (
+            data.map((row) => (
+              <TableRow key={row.id} className="cursor-pointer" onClick={() => selectEmployee(row)}>
+                <TableCell>{row.name}</TableCell>
+                <TableCell className="text-center">{row.salary}</TableCell>
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan="2" className="text-center">No data available</TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
     </div>

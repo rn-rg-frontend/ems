@@ -3,7 +3,7 @@ import { withAdminAuth } from "@/lib/middleware";
 
 export const GET = withAdminAuth(async (req, { params }) => {
     try {
-        const { id } = params;
+        const { id } = await params;
         const numericId = Number(id);
 
         if (isNaN(numericId)) {

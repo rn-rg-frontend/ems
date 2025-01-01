@@ -15,7 +15,7 @@ export const GET = withAuth(async (req, {params}) => {
                 userName: true,
                 isAdmin: true,
                 name: true,
-                photo: true,
+                // photo: true,
                 designation: true,
                 dateOfJoining: true,
                 email: true,
@@ -40,6 +40,29 @@ export const GET = withAuth(async (req, {params}) => {
                   },            
             },
         })
+        const filterempData = {
+            id: empData.id,
+            userName: empData.userName,
+            isAdmin: empData.isAdmin,
+            name: empData.name,
+            designation: empData.designation,
+            dateOfJoining: empData.dateOfJoining,
+            email: empData.email,
+            contactDetails: empData.contactDetails,
+            DOB: empData.DOB,
+            highestEducation: empData.highestEducation,
+            instituteName: empData.instituteName,
+            aadharCard: empData.aadharCard,
+            panCard: empData.panCard,
+            bloodGroup: empData.bloodGroup,
+            address: empData.address,
+            endDate: empData.endDate,
+            emergencyContact: empData.emergencyContact,
+            medicalHistory: empData.medicalHistory,
+            createdAt: empData.createdAt,
+            salary: empData.salary.salary,
+            totalLeave: empData.totalLeave,
+        };
         const totalApprovedWFH = await prisma.wFHtable.count({
             where: {
                 userProfileId: Number(id),
@@ -49,7 +72,7 @@ export const GET = withAuth(async (req, {params}) => {
 
         return new Response(
             JSON.stringify({
-                    ...empData,
+                    ...filterempData,
                     totalApprovedWFH,
             }),
             {

@@ -3,17 +3,29 @@ import { withAdminAuth } from "@/lib/middleware";
 
 export const GET = withAdminAuth(async (req, { params }) => {
     try {
-        const empSalary = await prisma.salary.findMany({
+        const empSalary = await prisma.userProfile.findMany({
             select: {
                 id: true,
-                employeeId: true,
-                salary: true,
+                name: true,
+                salary: {
+                    select: {
+                        id: true,
+                        salary: true
+                    }
+                }
             }
         })
 
+        const formattedSalary = empSalary.map((record) => ({
+            id: record.id,
+            name: record.name,
+            salary: record.salary ? record.salary.salary : null, 
+            salaryId: record.salary ? record.salary.id : null
+          }));
+
         return new Response(
             JSON.stringify({
-                empSalary
+                formattedSalary
             }),
             {
                 status: 200,

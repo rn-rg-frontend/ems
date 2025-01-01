@@ -4,6 +4,9 @@ import { withAdminAuth, withAuth } from "@/lib/middleware";
 export const GET = withAdminAuth(async (req, { params }) => {
     try {
         const WFH = await prisma.wFHtable.findMany({
+            where: {
+                status: null,
+            },
             select: {
               id: true,
               userProfileId: true,
@@ -25,13 +28,7 @@ export const GET = withAdminAuth(async (req, { params }) => {
             name: record.userProfile.name, 
           }));
           
-         
-          
-          
-          
-          
-          
-
+        
         return new Response(JSON.stringify({
             success: true,
             data: formattedWFH,

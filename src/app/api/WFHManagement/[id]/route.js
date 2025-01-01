@@ -39,20 +39,21 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
             const updatedUserProfile = await prisma.userProfile.update({
                 where: { id: wfhRecord.userProfileId },
                 data: {
-                    totalWFH: totalWFH + 1, 
+                    totalWFH: totalWFH + 1,
                 },
             });
-
+        
             const updatedWFH = await prisma.wFHtable.update({
                 where: { id: Number(id) },
                 data: {
-                    status: status, 
+                    status: status,
                 },
             });
-
+        
             return new Response(
                 JSON.stringify({
                     success: true,
+                    message: "WFH request approved",
                     data: {
                         updatedWFH,
                         updatedTotalWFH: updatedUserProfile.totalWFH,
@@ -64,17 +65,18 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
                 }
             );
         }
-
+        
         const updatedWFH = await prisma.wFHtable.update({
             where: { id: Number(id) },
             data: {
                 status: status,
             },
         });
-
+        
         return new Response(
             JSON.stringify({
                 success: true,
+                message: "WFH request rejected",
                 data: updatedWFH,
             }),
             {
@@ -82,6 +84,7 @@ export const PATCH = withAdminAuth(async (req, { params }) => {
                 headers: { 'Content-Type': 'application/json' },
             }
         );
+        
     } catch (error) {
         return new Response(
             JSON.stringify({ success: false, message: error.message }),

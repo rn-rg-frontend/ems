@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button } from '../ui/button'
 import {  MoveLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
@@ -12,6 +12,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { getEmployeeProfile, getLeavesData } from '../services/api'
+import { useSession } from 'next-auth/react'
 const data = [
     { id: 1, employeeName: "Michael Davis", leaveType: "Maternity Leave", fromDate: "2023-04-22", toDate: "2023-04-26" },
     { id: 5, employeeName: "Michael Thomas", leaveType: "Annual Leave", fromDate: "2023-11-21", toDate: "2023-11-27" },
@@ -20,8 +22,23 @@ const data = [
     { id: 10, employeeName: "Michael Taylor", leaveType: "Casual Leave", fromDate: "2023-05-21", toDate: "2023-05-23" }
 ]
     ;
-function EmployeeLeaves() {
+function EmployeeLeaves({employeeId}) {
     const router = useRouter()
+    const [leaves,setLeaves] = useState([])
+    const [employeeName,setEmployeeName] = useState()
+    const {data:session} = useSession();
+    
+    useEffect(()=>{
+        if(session?.user?.accessToken)
+        (async()=>{
+            const leaveData = await getLeavesData(session?.user?.accessToken,employeeId)
+            setLeaves(leaveData.approved)
+            
+            const res = await getEmployeeProfile(session?.user?.accessToken, employeeId)
+            setEmployeeName(res.name)
+
+        })()
+    },[session])
     const goToLeaves = () => {
         router.push('/employees/1/leaves')
     }
@@ -34,9 +51,9 @@ function EmployeeLeaves() {
                 <MoveLeft /> <span>All Employees</span>
             </Link >
             <div className='mt-4 flex flex-col gap-6'>
-                <Link href={'/admin/1/profile'} className='text-2xl font-semibold text-center'> Akshad Pardeshi </Link>
+                <Link href={'/admin/1/profile'} className='text-2xl font-semibold text-center'> {employeeName} </Link>
                 <div className=' w-2/3 text-center m-auto '>
-                    Akshad has 08 leaves pending in the year of 2025
+                    {employeeName} has {20 - leaves.length} leaves pending in the year of 2025
                 </div>
                 <Table>
                     <TableHeader className='bg-rgtheme hover:bg-rgtheme'>
@@ -44,17 +61,20 @@ function EmployeeLeaves() {
                             <TableHead className='text-white font-bold'>Leave From</TableHead>
                             <TableHead className='text-white font-bold'>Leave To</TableHead>
                             <TableHead className='text-white font-bold'>Leave Type</TableHead>
+                            <TableHead className='text-white font-bold'>Total</TableHead>
 
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {data.map((row) => (
+                        {leaves.map((row) => (
                             <TableRow key={row.id}>
-                                <TableCell>{row.fromDate}</TableCell>
-                                <TableCell>{row.toDate}</TableCell>
+                                <TableCell>{row.startDate}</TableCell>
+                                <TableCell>{row.endDate}</TableCell>
                                 <TableCell>{row.leaveType}</TableCell>
+                                <TableCell>{row.totalLeaves}</TableCell>
                             </TableRow>
                         ))}
+                        
 
                     </TableBody>
                 </Table>

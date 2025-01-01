@@ -1,10 +1,11 @@
 import EmployeeProfile from '@/components/Employees/Profile'
 import React from 'react'
 
-function Profile() {
+async function Profile({params}) {
+  const {employeeid} = await params
   return (
     <div className='flex-grow overflow-auto'>
-        <EmployeeProfile/>  
+        <EmployeeProfile employeeId={employeeid}/>  
     </div>
   )
 }

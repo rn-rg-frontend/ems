@@ -75,45 +75,15 @@ export const PATCH = withAdminAuth(async (req, {params}) => {
             id: true,
             userName: true,
             name: true,
-            designation: true,
-            email: true,
-            contactDetails: true,
-            dateOfJoining: true,
-            photo: true,
-            DOB: true,
-            highestEducation: true,
-            instituteName: true,
-            aadharCard: true,
-            panCard: true,
-            bloodGroup: true,
-            address: true,
-            endDate: true,
-            emergencyContact: true,
-            medicalHistory: true,
-            totalLeave: true,
-            salary: {
-              select: {
-                salary: true,
-                id: true,
-              },
-            },
-            salaryhistory: {
-              take: 5,
-              orderBy: {
-                createdAt: 'desc'
-              },
-              select: {
-                previousSalary: true,
-                year: true,
-                createdAt: true
-              }
-            }
           },
           data: updateData,
         });
 
         return new Response(
-          JSON.stringify(updatedUserProfile),
+          JSON.stringify({
+            updatedUserProfile,
+            message: "Profile Update Successfully"
+          }),
           { status: 200, headers: { 'Content-Type': 'application/json' } }
         );
       });
@@ -125,28 +95,7 @@ export const PATCH = withAdminAuth(async (req, {params}) => {
         id: true,
         userName: true,
         name: true,
-        designation: true,
-        email: true,
-        contactDetails: true,
-        dateOfJoining: true,
-        photo: true,
-        DOB: true,
-        highestEducation: true,
-        instituteName: true,
-        aadharCard: true,
-        panCard: true,
-        bloodGroup: true,
-        address: true,
-        endDate: true,
-        emergencyContact: true,
-        medicalHistory: true,
-        totalLeave: true,
-        salary: {
-          select: {
-            salary: true,
-            id: true,
-          },
-        },
+        
       },
       data: updateData,
     });

@@ -11,87 +11,52 @@ import {
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { Input } from '../ui/input';
-
-const data1 = []
+import { getExpense } from '../services/api';
+import { getExpenseType } from '../services/api';
+import { useSession } from 'next-auth/react';
+import { useRef } from 'react';
+import BeatLoader from 'react-spinners/BeatLoader'
 
 const DataTableWithExport = ({ setAddExpence }) => {
-  // Sample data
+  function formatDate(isoDateString) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    return new Date(isoDateString).toLocaleDateString(undefined, options);
+  }
+
   const [total, setTotal] = useState(200)
   const [minDate, setMinDate] = useState()
   const [maxDate, setMaxDate] = useState()
+  const { data: session } = useSession();
+  const apiCalled = useRef(false);
+  const [data, setData] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [accountType, setAccountType] = useState([]);
 
-  const [data, setDate] = useState([
-    {
-      id: 1,
-      date: "2024-03-15T14:32:00.000Z",
-      expenseReason: "Office Supplies",
-      amount: 123.45,
-      accountType: "icici"
-    },
-    {
-      id: 2,
-      date: "2024-07-09T09:10:00.000Z",
-      expenseReason: "Travel",
-      amount: 89.99,
-      accountType: "icici"
-    },
-    {
-      id: 3,
-      date: "2023-12-25T18:45:00.000Z",
-      expenseReason: "Entertainment",
-      amount: 250.00,
-      accountType: "icici"
-    },
-    {
-      id: 4,
-      date: "2024-02-03T11:25:00.000Z",
-      expenseReason: "Meals",
-      amount: 45.67,
-      accountType: "icici"
-    },
-    {
-      id: 5,
-      date: "2024-05-18T08:15:00.000Z",
-      expenseReason: "Transportation",
-      amount: 75.80,
-      accountType: "icici"
-    },
-    {
-      id: 6,
-      date: "2024-01-12T20:05:00.000Z",
-      expenseReason: "Utilities",
-      amount: 110.50,
-      accountType: "icici"
-    },
-    {
-      id: 7,
-      date: "2024-09-29T14:50:00.000Z",
-      expenseReason: "Miscellaneous",
-      amount: 39.99,
-      accountType: "hdfc"
-    },
-    {
-      id: 8,
-      date: "2024-06-14T10:30:00.000Z",
-      expenseReason: "Meals",
-      amount: 120.75,
-      accountType: "hdfc"
-    },
-    {
-      id: 9,
-      date: "2023-11-22T22:10:00.000Z",
-      expenseReason: "Travel",
-      amount: 200.00,
-      accountType: "hdfc"
-    },
-    {
-      id: 10,
-      date: "2024-08-01T16:45:00.000Z",
-      expenseReason: "Office Supplies",
-      amount: 67.89,
-      accountType: "icici"
+  const fetchExpenseList = async (token) => {
+    try {
+      setIsLoading(true)
+      const response = await getExpense(token)
+      const typeOfExpense = await getExpenseType(token)
+      setAccountType(typeOfExpense)
+      console.log(typeOfExpense)
+      setData(response.data)
+      setFilterDate(response.data)
+      console.log(data)
+    } catch (error) {
+      console.log("unable to get data", error)
+    } finally{
+      setIsLoading(false)
     }
-  ])
+  }
+
+
+  useEffect(() => {
+    if (session?.user?.accessToken && !apiCalled.current) {
+      apiCalled.current = true;
+      fetchExpenseList(session?.user?.accessToken);
+    }
+  }, [session])
+
   const [filterData, setFilterDate] = useState([...data])
   useEffect(() => {
     let t = 0;
@@ -116,16 +81,11 @@ const DataTableWithExport = ({ setAddExpence }) => {
       if (type == 'all') {
         setFilterDate(data.filter(record => true))
       } else {
-        setFilterDate(data.filter(record => record.accountType === type))
+        setFilterDate(data.filter(record => record.typeOfExpenseName === type))
       }
     }
   }
-  // const minDate = (date) => {
-  //   setFilterDate(data.filter(record => new Date(record.date) >= new Date(date)))
-  // }
-  // const maxDate = (date) => {
-  //   setFilterDate(data.filter(record => new Date(record.date) <= new Date(date)))
-  // }
+  
 
   const exportToExcel = () => {
     // Create Excel-compatible XML
@@ -147,7 +107,7 @@ const DataTableWithExport = ({ setAddExpence }) => {
       });
       return '<Row>' + cells.join('') + '</Row>';
     }).join('');
-    const bottomRow = `<Row><Cell ss:MergeAcross="${2}"><Data ss:Type="String">Total</Data></Cell><Cell><Data ss:Type="Number">200</Data></Cell></Row>`;
+    const bottomRow = `<Row><Cell ss:MergeAcross="${2}"><Data ss:Type="String">Total</Data></Cell><Cell><Data ss:Type="Number">${total}</Data></Cell></Row>`;
     rows += bottomRow
     const worksheetFooter = '</Table></Worksheet></Workbook>';
     const excelContent = xmlHeader + worksheetHeader + headerRow + rows + worksheetFooter;
@@ -167,10 +127,16 @@ const DataTableWithExport = ({ setAddExpence }) => {
       <div className="flex justify-end flex-wrap space-x-2">
         <div className='flex gap-1'>
           <select className='border border-black rounded' onChange={(e) => selectAccountType(e.target.value)}>
-            <option>all</option>
-            <option>icici</option>
-            <option>hdfc</option>
-            <option>kotak</option>
+            <option value="all">all</option>
+            {accountType && accountType.length > 0 ? (
+              accountType.map((type) => (
+                <option key={type.id} value={type.name}>
+                  {type.name}
+                </option>
+              ))
+            ) : (
+              <option disabled>Loading...</option>
+            )}
           </select>
           <div className='flex items-center gap-1'>
             <Input type='date' className='border-black' onChange={(e) => setMinDate(e.target.value)}>
@@ -194,29 +160,46 @@ const DataTableWithExport = ({ setAddExpence }) => {
 
       </div>
 
-      <Table>
-        <TableHeader className='bg-rgtheme '>
-          <TableRow>
-            <TableHead className='text-white font-bold'>ID</TableHead>
-            <TableHead className='text-white font-bold'>Date</TableHead>
-            <TableHead className='text-white font-bold'>Account Type</TableHead>
-            <TableHead className='text-white font-bold'>Expense Reason</TableHead>
-            <TableHead className='text-white font-bold'>Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className='h-4/5 overflow-scroll'>
-          {filterData.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.id}</TableCell>
-              <TableCell>{row.date}</TableCell>
-              <TableCell>{row.accountType}</TableCell>
-              <TableCell>{row.expenseReason}</TableCell>
-              <TableCell>{row.amount}</TableCell>
+      <div className="rounded-md border !mt-1 relative">
+        {isLoading && (
+          <div className="absolute inset-0 h-96 bg-white/70 flex justify-center items-center z-10">
+            <BeatLoader />
+          </div>
+        )}
+        <Table>
+          <TableHeader className="bg-rgtheme">
+            <TableRow>
+              <TableHead className="text-white font-bold">ID</TableHead>
+              <TableHead className="text-white font-bold">Date</TableHead>
+              <TableHead className="text-white font-bold">Account Type</TableHead>
+              <TableHead className="text-white font-bold">Expense Reason</TableHead>
+              <TableHead className="text-white font-bold">Amount</TableHead>
             </TableRow>
-          ))}
+          </TableHeader>
+          <TableBody>
+            {filterData.length > 0 ? (
+              filterData.map((row) => (
+                <TableRow key={row.id}>
+                  <TableCell>{row.id}</TableCell>
+                  <TableCell>{formatDate(row.date)}</TableCell>
+                  <TableCell>{row.typeOfExpenseName}</TableCell>
+                  <TableCell>{row.reason}</TableCell>
+                  <TableCell>{row.amount}</TableCell>
+                </TableRow>
+              ))
+            ) : (
+              !isLoading && (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    No records.
+                  </TableCell>
+                </TableRow>
+              )
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-        </TableBody>
-      </Table>
       <div className='grid grid-cols-4 sticky bottom-0 bg-rgtheme text-white font-bold  px-2 py-1'>
         <p colSpan={3} className='col-span-3'>Total</p>
         <p className='col-span-1 text-center'>{total}</p>

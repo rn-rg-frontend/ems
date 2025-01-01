@@ -35,48 +35,41 @@ import {
 } from "@/components/ui/table"
 import { approveRejectLeave } from "../services/api";
 import { toast } from "react-toastify";
+import BeatLoader from 'react-spinners/BeatLoader'
 
-// const data = [
-//   { id: 1, employeeName: "Michael Davis", leaveType: "Maternity Leave", fromDate: "2023-04-22", toDate: "2023-04-26" },
-//   { id: 2, employeeName: "Michael Davis", leaveType: "Sick Leave", fromDate: "2023-05-23", toDate: "2023-05-30" },
-//   { id: 3, employeeName: "Jane Smith", leaveType: "Sick Leave", fromDate: "2023-09-17", toDate: "2023-09-20" },
-//   { id: 4, employeeName: "Chris Thomas", leaveType: "Paternity Leave", fromDate: "2024-12-29", toDate: "2025-01-04" },
-//   { id: 5, employeeName: "Michael Thomas", leaveType: "Annual Leave", fromDate: "2023-11-21", toDate: "2023-11-27" },
-//   { id: 6, employeeName: "Jane Anderson", leaveType: "Maternity Leave", fromDate: "2023-06-20", toDate: "2023-06-25" },
-//   { id: 7, employeeName: "Alex Miller", leaveType: "Paternity Leave", fromDate: "2023-12-09", toDate: "2023-12-11" },
-//   { id: 8, employeeName: "Laura Wilson", leaveType: "Annual Leave", fromDate: "2023-10-23", toDate: "2023-10-28" },
-//   { id: 9, employeeName: "Michael Moore", leaveType: "Annual Leave", fromDate: "2024-12-27", toDate: "2025-01-05" },
-//   { id: 10, employeeName: "Michael Taylor", leaveType: "Casual Leave", fromDate: "2023-05-21", toDate: "2023-05-23" }
-// ]
 
 function formatDate(isoDateString) {
-  const options = { year: 'numeric', month: '2-digit', day: '2-digit' }; // Customize format as needed
+  const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
   return new Date(isoDateString).toLocaleDateString(undefined, options);
 }
 
-
 export default function DataTableDemo() {
+  const [isLoading, setIsLoading] = useState(false)
   const [data, setData] = useState([])
   const { data: session } = useSession();
+  const [text, setText] = useState("");
   const fetchLeaveData = async () => {
     try {
+      setIsLoading(true)
       const response = await getLeaveRequest(session?.user?.accessToken);
       console.log("Leave Request Data:", response);
       setData(response);
+      if(response.length == 0 ){
+        setText("No records")
+      }
       return;
     } catch (error) {
-      
-        console.error("Error details:", error);
-      
+      console.error("Error details:", error);
+    } finally {
+      setIsLoading(false)
     }
   };
-  
+
   useEffect(() => {
-    if(session?.user?.accessToken){
+    if (session?.user?.accessToken) {
       fetchLeaveData();
     }
   }, [session]);
-  
 
   const columns = [
     {
@@ -115,7 +108,7 @@ export default function DataTableDemo() {
           try {
             const data = { status };
             const response = await approveRejectLeave(session?.user?.accessToken, data, row.getValue("leaveId"));
-         
+
             console.log(response.data.status)
 
             toast.success(response.message)
@@ -158,6 +151,7 @@ export default function DataTableDemo() {
     React.useState({})
   const [rowSelection, setRowSelection] = React.useState({})
 
+
   const table = useReactTable({
     data,
     columns,
@@ -189,107 +183,57 @@ export default function DataTableDemo() {
           }
           className="max-w-sm ms-1"
         />
-        {/* <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu> */}
+
       </div>
-      <div className="rounded-md border !mt-1">
-        <Table>
-          <TableHeader className='bg-rgtheme hover:bg-rgtheme'>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead className='text-white font-bold' key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
+      <div className="rounded-md border !mt-1 relative">
+    {isLoading && (
+      <div className="absolute inset-0 h-96 bg-white/70 flex justify-center items-center z-10">
+        <BeatLoader />
+      </div>
+    )}
+    <Table>
+      <TableHeader className="bg-rgtheme hover:bg-rgtheme">
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id}>
+            {headerGroup.headers.map((header) => {
+              return (
+                <TableHead className="text-white font-bold" key={header.id}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
                       )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => (
+            <TableRow
+              key={row.id}
+              data-state={row.getIsSelected() && "selected"}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
-      {/* <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of{" "}
-          {table.getFilteredRowModel().rows.length} row(s) selected.
-        </div>
-        <div className="space-x-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
-        </div>
-      </div> */}
+              ))}
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell colSpan={columns.length} className="h-24 text-center">
+              {text}
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+    </Table>
+  </div>
     </div>
   )
 }
