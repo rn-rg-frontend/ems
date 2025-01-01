@@ -321,9 +321,10 @@ export const postEmployee = async (token, data) => {
                 Authorization: `Bearer ${token}`,
             },
         })
+       
         return response.data;
     } catch (error) {
-        throw new Error(error.response ? error.response.data : "Failed to fetch users list");
+        throw new Error(error)
     }
 }
 

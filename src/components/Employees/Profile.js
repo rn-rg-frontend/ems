@@ -7,6 +7,7 @@ import { Button } from '../ui/button'
 import { useSession } from 'next-auth/react'
 import { getEmployeeProfile } from '../services/api'
 import { editUser } from '../services/api'
+import { toast } from 'react-toastify'
 
 function EmployeeProfile({ employeeId }) {
   const [editPersonal, setEditPersonal] = useState(false)
@@ -44,8 +45,10 @@ const ChagePersonalDetails = (key, val) => {
     try {
       const data = await editUser(session?.user?.accessToken, employeeId, editedFields)
       console.log(data)
+      toast.success("Profile Edited Successfully")
     } catch (error) {
-      console.log(error)      
+      console.log(error)     
+      toast.error("Unable to edit profile") 
     }
     setEditPersonal(false)
     setEditAdditional(false)

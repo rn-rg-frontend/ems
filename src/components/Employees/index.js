@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { Button } from '../ui/button';
 import { MoveLeft, Pencil } from 'lucide-react';
 import { Camera } from 'lucide-react';
+import { toast } from 'react-toastify';
 const randomArray = [
     { name: "Fiona Taylor", id: 1, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
     { name: "Bob Harris", id: 2, profile_pic: "https://randomuser.me/api/portraits/men/44.jpg" },
@@ -57,7 +58,7 @@ function Employees() {
             "DOB": "",
             "highestEducation": "",
             "instituteName": "",
-            "aadharCard": "2",
+            "aadharCard": "",
             "panCard": "",
             "bloodGroup": "",
             "totalLeave": 20,
@@ -140,8 +141,11 @@ function Employees() {
         const formData = objectToFormData({...employeeDetail, photo:imageData})
         try{
             const data = await postEmployee(session?.user?.accessToken,formData)
-        }catch(err){
-            console.log(err)
+
+            toast.success("Employee added succesfully")
+        }catch(error){
+            console.log(error)
+            toast.error("Unable to create the employee")
         }
         setEditPersonal(false)
     }
@@ -167,7 +171,7 @@ function Employees() {
                                 )}
                             </div>
                             <div>
-                                <Input
+                                <Input required
                                     type="file"
                                     accept="image/*"
                                     onChange={handleImageChange}
@@ -185,35 +189,35 @@ function Employees() {
 
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Username </p>
-                            <Input name='name' onChange={(e) => ChagePersonalDetails('userName', e.target.value)} value={employeeDetail.userName} className=' col-span-3' />
+                            <Input required name='name' onChange={(e) => ChagePersonalDetails('userName', e.target.value)} value={employeeDetail.userName} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>password </p>
-                            <Input name='name' onChange={(e) => ChagePersonalDetails('password', e.target.value)} value={employeeDetail.password} className=' col-span-3' />
+                            <Input required name='name' onChange={(e) => ChagePersonalDetails('password', e.target.value)} value={employeeDetail.password} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Name </p>
-                            <Input name='name' onChange={(e) => ChagePersonalDetails('name', e.target.value)} value={employeeDetail.name} className=' col-span-3' />
+                            <Input required name='name' onChange={(e) => ChagePersonalDetails('name', e.target.value)} value={employeeDetail.name} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Designation </p>
-                            <Input name='designation' onChange={(e) => ChagePersonalDetails('designation', e.target.value)} value={employeeDetail.designation} className=' col-span-3' />
+                            <Input required name='designation' onChange={(e) => ChagePersonalDetails('designation', e.target.value)} value={employeeDetail.designation} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Date of Joining </p>
-                            <Input type='date' name='dateOfJoining' onChange={(e) => ChagePersonalDetails('dateOfJoining', e.target.value)} value={employeeDetail.dateOfJoining} className=' col-span-3' />
+                            <Input required type='date' name='dateOfJoining' onChange={(e) => ChagePersonalDetails('dateOfJoining', e.target.value)} value={employeeDetail.dateOfJoining} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Email ID </p>
-                            <Input onChange={(e) => ChagePersonalDetails('email', e.target.value)} value={employeeDetail.email} className=' col-span-3' />
+                            <Input required onChange={(e) => ChagePersonalDetails('email', e.target.value)} value={employeeDetail.email} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Salary </p>
-                            <Input type='number' min={0} onChange={(e) => ChagePersonalDetails('salaryAmount', Number(e.target.value))} value={employeeDetail.salaryAmount} className=' col-span-3' />
+                            <Input required type='number' min={0} onChange={(e) => ChagePersonalDetails('salaryAmount', Number(e.target.value))} value={employeeDetail.salaryAmount} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Leaves </p>
-                            <Input onChange={(e) => ChagePersonalDetails('totalLeave', e.target.value)} value={employeeDetail.totalLeave} className=' col-span-3' />
+                            <Input required onChange={(e) => ChagePersonalDetails('totalLeave', e.target.value)} value={employeeDetail.totalLeave} className=' col-span-3' />
                         </div>
 
                     </div>
@@ -221,31 +225,31 @@ function Employees() {
                         <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Additional Details <Pencil className='ms-auto w-5 h-5' /></p>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p> Institute </p>
-                            <Input value={employeeDetail.instituteName} onChange={(e) => ChagePersonalDetails("instituteName",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.instituteName} onChange={(e) => ChagePersonalDetails("instituteName",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p> highestEducation </p>
-                            <Input value={employeeDetail.highestEducation} onChange={(e) => ChagePersonalDetails("highestEducation",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.highestEducation} onChange={(e) => ChagePersonalDetails("highestEducation",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Date of birth </p>
-                            <Input type='date' value={employeeDetail.DOB} onChange={(e) => ChagePersonalDetails("DOB",e.target.value)} className=' col-span-3' />
+                            <Input required type='date' value={employeeDetail.DOB} onChange={(e) => ChagePersonalDetails("DOB",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p> Aadhar Card No </p>
-                            <Input value={employeeDetail.aadharCard} onChange={(e) => ChagePersonalDetails("aadharCard",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.aadharCard} onChange={(e) => ChagePersonalDetails("aadharCard",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Pan No </p>
-                            <Input value={employeeDetail.panCard} onChange={(e) => ChagePersonalDetails("panCard",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.panCard} onChange={(e) => ChagePersonalDetails("panCard",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p> Blood group </p>
-                            <Input value={employeeDetail.bloodGroup} onChange={(e) => ChagePersonalDetails("bloodGroup",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.bloodGroup} onChange={(e) => ChagePersonalDetails("bloodGroup",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p> MedicalHistory </p>
-                            <Input value={employeeDetail.medicalHistory} onChange={(e) => ChagePersonalDetails("medicalHistory",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.medicalHistory} onChange={(e) => ChagePersonalDetails("medicalHistory",e.target.value)} className=' col-span-3' />
                         </div>
                     </div>
 
@@ -253,11 +257,11 @@ function Employees() {
                         <p className='bg-rgtheme text-center py-1 px-2 text-lg font-bold text-white rounded flex items-center'>Contact Details <Pencil className='ms-auto w-5 h-5' /></p>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Address </p>
-                            <Input value={employeeDetail.address} onChange={(e) => ChagePersonalDetails("address",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.address} onChange={(e) => ChagePersonalDetails("address",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Phone No </p>
-                            <Input value={employeeDetail.contactDetails} onChange={(e) => ChagePersonalDetails("contactDetails",e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.contactDetails} onChange={(e) => ChagePersonalDetails("contactDetails",e.target.value)} className=' col-span-3' />
                         </div>
                         <div className='flex w-11/12 mx-auto items-center'>
                             <p className='border border-gray-300 flex-grow'></p>
@@ -266,7 +270,7 @@ function Employees() {
                         </div>
                         <div className='grid grid-cols-4 items-center text-sm'>
                             <p>Phone No </p>
-                            <Input value={employeeDetail.emergencyContact} onChange={(e) => ChagePersonalDetails("emergencyContact", e.target.value)} className=' col-span-3' />
+                            <Input required value={employeeDetail.emergencyContact} onChange={(e) => ChagePersonalDetails("emergencyContact", e.target.value)} className=' col-span-3' />
                         </div>
                         <Button className='hover:border-rgtheme hover:text-rgtheme border-black' variant='outline'>Submit</Button>
                     </div>
