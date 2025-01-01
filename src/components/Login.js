@@ -90,16 +90,16 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Label } from "./ui/label";
-// import { useSession } from "next-auth/react";
+import { toast, ToastContainer } from "react-toastify";
+import { useSession } from "next-auth/react";
 
 export default function Login() {
   const [globalError, setGlobalError] = useState();
   const router = useRouter();
 
-  // const {data: session} = useSession()
+  const {data: session} = useSession()
   const handleLogin = async (e) => {
     e.preventDefault();
-    
     const username = e.target.username.value;
     const password = e.target.password.value;
 
@@ -110,7 +110,7 @@ export default function Login() {
     });
 
     if (result?.error) {
-      console.log('Invalid username or password');
+      toast.error("Username or password incorrect")
     } else {
       console.log("login succesfully")
       // Get the session data to check isAdmin
@@ -118,7 +118,7 @@ export default function Login() {
       // const session = await response.json();
 
       router.push('/admin')
-      // if (session.user.isAdmin) {
+      // if (session?.user?.isAdmin) {
       //   router.push('/admin');
       // } else {
       //   router.push('/rgemployee');
@@ -134,7 +134,7 @@ export default function Login() {
             <div className='flex items-center flex-shrink-0'>
               <Image src={'/RG.jpeg'} width={100} height={100} alt="rglogo" className='md:w-14 md:h-14 w-8 h-8' />
               <div className='flex flex-col items-center justify-center'>
-                <p><span className='text-rgtheme md:text-xl md:font-bold font-semibold text-base'>Rotten </span><span className='text-rgtheme2 md:text-xl md:font-bold font-semibold text-bas'>Grapes</span></p>
+                <p><span className='text-rgtheme md:text-xl md:font-bold font-semibold text-base'>Rotten </span><span className='text-rgtheme2  md:text-xl md:font-bold font-semibold text-base'>Grapes</span></p>
                 <p className='text-sm text-gray-500 font-bold relative w-full text-center'><span>Pvt.Ltd</span><span className='w-4/5 absolute border-1 border-gray-500 top-1/2'></span></p>
               </div>
             </div>
@@ -160,6 +160,7 @@ export default function Login() {
           </form>
         </CardContent>
       </Card>
+      
     </div>
   );
 }

@@ -26,29 +26,7 @@ function Sidebar() {
         <Link href='/rgemployee/wfhapplication' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/rgemployee/wfhapplicationt' && 'border-rgtheme text-rgtheme'}  rounded`}><Home /><span>WFH Application</span></Link>
 
       </div>
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="lg:hidden">
-            <MenuIcon className="h-6 w-6" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left">
-          <SheetHeader>
-            <SheetTitle className='hidden'></SheetTitle>
-            <SheetDescription className='hidden'>
-            </SheetDescription>
-          </SheetHeader>
-          <div className="grid w-[200px] p-4">
-            <Link href='/rgemployee/announcement' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/rgemployee/announcement' && 'border-rgtheme text-rgtheme'}  rounded`}><LayoutDashboard className='' /> <span> Company Profile and
-              Annocements</span></Link>
-            <Link href='/rgemployee' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/rgemployee' && 'border-rgtheme text-rgtheme'}  rounded`}><Users /><span>My Profile</span></Link>
-            <Link href='/rgemployee/leaveapplication' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/rgemployee/leaveapplication' && 'border-rgtheme text-rgtheme'}  rounded`}><CalendarDays /><span> Leave Application</span></Link>
-            <Link href='/rgemployee/wfhapplication' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/rgemployee/wfhapplicationt' && 'border-rgtheme text-rgtheme'}  rounded`}><Home /><span>WFH Application</span></Link>
-
-          </div>
-        </SheetContent>
-      </Sheet>
+      
     </div>
   )
 }

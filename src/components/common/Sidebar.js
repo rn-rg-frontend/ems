@@ -27,32 +27,7 @@ function Sidebar() {
         <Link href='/admin/expencemanagement' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin/expencemanagement' && 'border-rgtheme text-rgtheme'}  rounded`}><HandCoins /><span>Expense Management</span></Link>
         <Link href='/admin/salarymanagement' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin/salarymanagement' && 'border-rgtheme text-rgtheme'}  rounded`}><CircleDollarSign /><span>Salary</span></Link>
       </div>
-      <Sheet>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="icon" className="lg:hidden">
-            <MenuIcon className="h-6 w-6" />
-            <span className="sr-only">Toggle navigation menu</span>
-          </Button>
-        </SheetTrigger>
 
-        <SheetContent side="left">
-          <SheetHeader>
-            <SheetTitle className='hidden'></SheetTitle>
-            <SheetDescription className='hidden'> 
-            </SheetDescription>
-          </SheetHeader>
-          <div className="grid w-[200px] p-4">
-          <Link href='/admin' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin' && 'border-rgtheme text-rgtheme'}  rounded`}><LayoutDashboard className='' /> <span>Company Profile and Annocements</span></Link>
-        <Link href='/admin/employees' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin/employees' && 'border-rgtheme text-rgtheme'}  rounded`}><Users /><span>All Employees</span></Link>
-        <Link href='/admin/leavemanagement' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin/leavemanagement' && 'border-rgtheme text-rgtheme'}  rounded`}><CalendarDays /><span>Leave Management</span></Link>
-        <Link href='/admin/wfhmanagement' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin/wfhmanagement' && 'border-rgtheme text-rgtheme'}  rounded`}><Home /><span>WFH Management</span></Link>
-        <Link href='/admin/expencemanagement' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin/expencemanagement' && 'border-rgtheme text-rgtheme'}  rounded`}><HandCoins /><span>Expense Management</span></Link>
-        <Link href='/admin/salarymanagement' className={`flex items-center gap-2 cursor-pointer p-2 border hover:border-rgtheme hover:text-rgtheme ${pathname === '/admin/salarymanagementP' && 'border-rgtheme text-rgtheme'}  rounded`}><CircleDollarSign /><span>Salary</span></Link>
-
-
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   )
 }

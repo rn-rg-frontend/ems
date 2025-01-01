@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import axios from 'axios';
 
-const authOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -24,6 +24,7 @@ const authOptions = {
               id: userData.user.id,
               name: userData.user.name,
               isAdmin: userData.user.isAdmin,
+              totalLeave: userData.user.totalLeave,
               token: userData.token
             };
           }
@@ -43,6 +44,7 @@ const authOptions = {
         token.accessToken = user.token;
         token.name = user.name;
         token.id = user.id;
+        token.totalLeave = user.totalLeave;
       }
       return token;
     },
@@ -51,6 +53,7 @@ const authOptions = {
       session.user.accessToken = token.accessToken;
       session.user.name = token.name; 
       session.user.id = token.id;
+      session.user.totalLeave = token.totalLeave;
       return session;
     }
   },

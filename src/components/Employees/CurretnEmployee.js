@@ -25,7 +25,7 @@ function CurretnEmployee({ employeeId }) {
     const [cvType,setCvType] = useState('');
     const [file,setFile] = useState('');
     const goToLeaves = () => {
-        router.push(`/admin/employees/${employeeId}/leaves`)
+        router.push(`/admin/employees/${ employeeId }/leaves`)
     }
     const goToWfh = () => {
         router.push(`/admin/employees/${employeeId}/wfh`)
@@ -142,9 +142,9 @@ function CurretnEmployee({ employeeId }) {
     useEffect(() => {
         if(session?.user?.accessToken)
         (async () => {
+            console.log(employeeId)
             const result = await getEmployeeProfile(session?.user?.accessToken, employeeId)
             setEmployeeName(result.name)
-            
         })()
     },[session])
 

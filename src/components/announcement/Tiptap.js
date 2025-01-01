@@ -9,13 +9,12 @@ import TextAlign from '@tiptap/extension-text-align';
 import { useState } from 'react';
 import OrderedList from '@tiptap/extension-ordered-list'
 
-const Tiptap = ({}) => {
-  const [content,setContent ] = useState(''); 
+const Tiptap = ({setContent,content}) => {
+
   const handleChange = (newContent) => {
     console.log("chnage")
     console.log(newContent)
-    setContent(newContent);
-    
+    setContent(newContent)
 
   };
   const CustomOrderedList = OrderedList.extend({
@@ -31,7 +30,7 @@ const Tiptap = ({}) => {
     extensions: [Underline,Image.configure({
       inline: true,
       HTMLAttributes:{
-        class : 'object-contain max-w-11/12 m-auto',
+        class : 'object-contain w-2/3 m-auto',
       }
     }),
       TextAlign.configure({
@@ -67,7 +66,7 @@ const Tiptap = ({}) => {
     onUpdate: ({ editor }) => {
       handleChange(editor.getHTML());
     },
-    immediateRender: false,
+    immediatelyRender: false,
     
   })
   if (!editor) {
@@ -75,7 +74,7 @@ const Tiptap = ({}) => {
   }
   return <div className="w-full">
     <Toolbar  editor={editor} content={content} />
-    <EditorContent  style={{ whiteSpace: "pre-line" }}   editor={editor} />
+    <EditorContent  style={{ whiteSpace: "pre-line" }}  editor={editor} />
   </div>
 }
 

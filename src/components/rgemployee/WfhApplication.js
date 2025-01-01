@@ -1,6 +1,6 @@
 "use client"
+import React from "react"
 
-import * as React from "react"
 import {
     flexRender,
     getCoreRowModel,
@@ -22,30 +22,28 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { Label } from "@radix-ui/react-label"
+import { getWFHData, postWfhdata } from "../services/api"
+import { useSession } from "next-auth/react"
 
-const data = [
-    { id: 1, employeeName: "Michael Davis", leaveType: "Maternity Leave", fromDate: "2023-04-22", toDate: "2023-04-26" },
-    { id: 2, employeeName: "Michael Davis", leaveType: "Sick Leave", fromDate: "2023-05-23", toDate: "2023-05-30" },
-    { id: 3, employeeName: "Jane Smith", leaveType: "Sick Leave", fromDate: "2023-09-17", toDate: "2023-09-20" },
-    { id: 4, employeeName: "Chris Thomas", leaveType: "Paternity Leave", fromDate: "2024-12-29", toDate: "2025-01-04" },
-]
+
 
 
 
 export const columns = [
  {
-        accessorKey: "fromDate",
-        header: "WFH Date",
+        accessorKey: "date",
+        header: "Date",
         cell: ({ row }) => (
-            <div className="capitalize">{row.getValue("fromDate")}</div>
+            <div className="capitalize">{row.getValue("date").split("T")[0]}</div>
         ),
 
     },
     {
         header: "Status",
+        accessorKey: "status",
         cell: ({ row }) => (
             <div className="flex gap-2">
-                <Button variant='outline' className='border-green-500  hover:text-green-500'>Pending</Button>
+                <Button variant='outline' className='border-green-500  hover:text-green-500'>{row.getValue("status")}</Button>
             </div>
         ),
     },
@@ -58,6 +56,9 @@ export default function WFHApplication() {
     const [columnFilters, setColumnFilters] = React.useState(
         []
     )
+    const {data:session} = useSession()
+    const [data,setData] = React.useState([])
+    const [date,setDate] = React.useState('')
     const [columnVisibility, setColumnVisibility] =
         React.useState({})
     const [rowSelection, setRowSelection] = React.useState({})
@@ -80,15 +81,44 @@ export default function WFHApplication() {
             rowSelection,
         },
     })
-
+        React.useEffect(() => {
+            if (session?.user?.accessToken) {
+                (async () => {
+                    try {
+                        const data = await getWFHData(session?.user?.accessToken, session?.user?.id)
+                        
+                        if (!data.message) {
+                            let approved = data.approved.map(i => ({ ...i, status: 'accepted' }))
+                            let pending = data.pending.map(i => ({ ...i, status: 'pending' }))
+                            let rejected = data.rejected.map(i => ({ ...i, status: 'rejected' }))
+                            setData([...approved, ...pending, ...rejected])
+                        }
+                    } catch (err) {
+                        console.log(err)
+                    }
+    
+                })()
+            }
+        }, [session])
+    const postWfh =async (e) => {
+        e.preventDefault()
+        try {
+            const data = await postWfhdata(session?.user?.accessToken,{date,status: null,userProfileId:session?.user?.id})
+            if(data.success){
+                setData(prev => ([...prev, {date, status:'pending'}]))
+            }
+        } catch (err) {
+            console.log(err)
+        }
+    }
     return (
         <div className="w-full max-w-4xl m-auto space-y-4 h-[92%] overflow-x-hidden overflow-y-auto">
             <h1 className='text-2xl font-bold m-auto p-2 mb-4  border-b-2 '>WFH Application</h1>
            
-            <form className="flex flex-col gap-2">
+            <form className="flex flex-col gap-2" onSubmit={postWfh}>
                     <div className="flex gap-2 w-4/5 m-auto items-center">
                         <Label htmlFor="toDate w-1/4">WFH Date    </Label>
-                        <Input type="date" id='toDate' className='border-black w-4/5' />
+                        <Input type="date" value={date} onChange={(e)=> setDate(e.target.value)} id='toDate' className='border-black w-4/5' />
                     </div>
                 <Button className='self-center'>Submit</Button>
             </form>
